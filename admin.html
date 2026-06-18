@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>교사 대시보드 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<script src="js/admin-gate.js"></script>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">교사 대시보드 · 관리자 <span id="admin-email" class="muted" style="font-size:12px"></span></span>
+    <h1>학급 작업 한눈에 보기</h1>
+    <p>작품·성찰·피드백을 모아 봅니다. 저장 방식에 따라 <b id="mode-label">로컬</b> 데이터를 표시합니다.</p>
+  </div>
+  <div id="cloud-note"></div>
+
+  <div class="grid c4" id="stats"></div>
+
+  <h2 style="margin:22px 0 10px">학습 현황 (수준별 자동 추정)</h2>
+  <div class="card" style="overflow-x:auto"><table class="data" id="tbl-students"><thead><tr><th>이름</th><th>반</th><th>작품</th><th>전시</th><th>노트</th><th>피드백</th><th>근거기록</th><th>수준</th></tr></thead><tbody></tbody></table></div>
+  <p class="muted" style="font-size:11.5px;margin:6px 0 0">수준은 활동량(작품·전시·노트·피드백·근거 기록)에 따른 <b>자동 추정</b>이며, 성적 평가가 아니라 지도 참고용입니다.</p>
+
+  <div class="card" style="margin-top:16px">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+      <button id="btn-export" class="btn accent2">⬇ 전체 내보내기(JSON)</button>
+      <button id="btn-import" class="btn">⬆ 학생 JSON 취합(병합)</button>
+      <input id="imp" type="file" accept="application/json,.json" multiple hidden />
+      <input id="q" type="text" placeholder="이름·반·제목 검색" style="width:auto; flex:1; min-width:160px">
+      <select id="f-kind" style="width:auto"><option value="">전체 유형</option><option value="color">색 군집</option><option value="data">데이터 점</option></select>
+    </div>
+    <p class="muted" style="font-size:12px;margin:10px 0 0">취합: 학생이 ‘설정/노트’를 내보낸 JSON을 받아 여기서 병합하면 한 화면에서 학급 전체를 봅니다(실시간 클라우드 미설정 시).</p>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3 class="with-info">🤖 AI 감상 코치 설정 <span class="info-ic" data-info="ethics-ai">ⓘ</span></h3>
+    <p class="muted" style="font-size:12.5px;margin:0 0 10px">기본은 <b>오프라인 코치</b>(키 불필요)예요. 실제 모델을 켜면 더 풍부한 질문을 받지만,
+      무료 한도(분당 요청 5·입력 10K·출력 4K)를 8명이 나눠 쓰면 한도 초과 시 자동으로 오프라인으로 폴백합니다.</p>
+    <div id="coach-warn"></div>
+    <label class="chk-row"><input type="checkbox" id="c-enabled"> 실제 모델 사용(체크 해제 시 항상 오프라인)</label>
+    <div class="grid c2" style="margin-top:6px">
+      <div>
+        <label class="field">방식</label>
+        <select id="c-mode"><option value="direct">직접 호출(이 브라우저에 키 저장)</option><option value="proxy">프록시 서버(권장·키 숨김)</option></select>
+        <label class="field">모델</label>
+        <select id="c-model"><option value="claude-haiku-4-5-20251001">Haiku 4.5 (가장 빠름·권장)</option><option value="claude-sonnet-4-6">Sonnet 4.6</option><option value="claude-opus-4-8">Opus 4.8</option></select>
+      </div>
+      <div>
+        <div id="row-key"><label class="field">API 키 (이 기기 브라우저에만 저장 · 저장소엔 안 올라감)</label>
+          <input id="c-key" type="password" placeholder="sk-ant-..." autocomplete="off"></div>
+        <div id="row-endpoint" class="hide"><label class="field">프록시 주소</label>
+          <input id="c-endpoint" type="text" placeholder="https://your-proxy.example.com/coach"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+      <button id="c-save" class="btn primary">설정 저장</button>
+      <button id="c-test" class="btn">연결 테스트</button>
+      <button id="c-clear" class="btn ghost">초기화</button>
+      <span class="muted" id="c-status" style="font-size:12px"></span>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin:10px 0 0">⚠ ‘직접 호출’은 이 브라우저를 여는 사람이 키를 볼 수 있어요(교사 기기에서만 권장). 여러 학생이 쓰면 키 보호·중앙 한도 관리를 위해 <b>프록시</b>가 안전합니다.</p>
+  </div>
+
+  <h2 style="margin:22px 0 10px">작품</h2>
+  <div class="card" style="overflow-x:auto"><table class="data" id="tbl-works"><thead><tr><th>제목</th><th>이름</th><th>반</th><th>유형</th><th>전시</th><th>순서</th><th>테마</th><th>의도</th><th>피드백</th><th>시각</th></tr></thead><tbody></tbody></table>
+  <p class="muted" style="font-size:11.5px;margin:6px 0 0">큐레이션: ‘순서’와 ‘테마’를 입력하면 키오스크 전시 순서·묶음에 반영됩니다(자동 저장).</p></div>
+
+  <h2 style="margin:22px 0 10px">성찰·메모</h2>
+  <div class="card" style="overflow-x:auto"><table class="data" id="tbl-notes"><thead><tr><th>이름</th><th>유형</th><th>제목</th><th>내용 요약</th><th>시각</th></tr></thead><tbody></tbody></table></div>
+  <p class="footer-note">미성년자 정보 보호 · 표시 이름 정책과 학교 방침을 준수하세요</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/ratelimit.js"></script>
+<script src="js/coach.js"></script>
+<script>
+  document.getElementById('mode-label').textContent = Store.mode === 'cloud' ? '클라우드(실시간)' : '로컬(이 기기)';
+  (function(){ const ae = document.getElementById('admin-email'); if (ae && window.AdminGate) ae.textContent = '· ' + AdminGate.email; })();
+  if (Store.mode !== 'cloud') document.getElementById('cloud-note').innerHTML =
+    UI.callout('<b>실시간 클라우드 미설정</b> · 지금은 이 기기에 저장된 데이터만 보여요. <code>config/cloud-config.js</code>를 설정하면 한 링크에서 학급 전체가 실시간 공유됩니다(README 참고). 그 전엔 학생 JSON을 ‘취합’해 모으세요.', 'warn');
+
+  let works = [], notes = [], feedback = {}, allFb = [];
+  const KIND = { color: '색 군집', data: '데이터 점', lab: '분석실', reflection: '성찰', project: '프로젝트' };
+
+  async function load() {
+    works = await Store.listWorks();
+    notes = await Store.listNotes();
+    feedback = {}; allFb = [];
+    for (const w of works) { const items = await Store.listFeedback(w.id); feedback[w.id] = items.length; allFb.push(...items); }
+    stats(); renderStudents(); renderWorks(); renderNotes();
+  }
+
+  function studentLevel(s) {
+    const score = s.exhibited * 2 + s.works + s.notes + s.fb + (s.evidence ? 1 : 0);
+    if (score >= 5) return ['심화', 'adv'];
+    if (score >= 2) return ['중간', 'good'];
+    return ['기초', ''];
+  }
+  function renderStudents() {
+    const map = new Map();
+    const get = (id, name, klass) => { if (!map.has(id)) map.set(id, { name, klass: klass || '', works: 0, exhibited: 0, notes: 0, fb: 0, evidence: false }); const s = map.get(id); if (name && !s.name) s.name = name; if (klass && !s.klass) s.klass = klass; return s; };
+    works.forEach(w => { if (!w.userId) return; const s = get(w.userId, w.by, w.klass); s.works++; if (w.exhibited) s.exhibited++; if (w.evidence) s.evidence = true; });
+    notes.forEach(n => { if (!n.userId) return; get(n.userId, n.by).notes++; });
+    allFb.forEach(f => { if (!f.userId) return; get(f.userId, f.by).fb++; });
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    const rows = [...map.values()].filter(s => !q || (s.name || '').toLowerCase().includes(q))
+      .sort((a, b) => (b.exhibited - a.exhibited) || (b.works - a.works))
+      .map(s => { const [lvl, cls] = studentLevel(s); return `<tr><td>${UI.escapeHTML(s.name || '')}</td><td>${UI.escapeHTML(s.klass)}</td><td>${s.works}</td><td>${s.exhibited}</td><td>${s.notes}</td><td>${s.fb}</td><td>${s.evidence ? '✅' : ''}</td><td><span class="badge ${cls}">${lvl}</span></td></tr>`; }).join('');
+    document.querySelector('#tbl-students tbody').innerHTML = rows || '<tr><td colspan="8" class="muted">데이터 없음</td></tr>';
+  }
+  function stats() {
+    const students = new Set([...works.map(w => w.userId), ...notes.map(n => n.userId)].filter(Boolean));
+    const exhibited = works.filter(w => w.exhibited).length;
+    const fb = Object.values(feedback).reduce((a, b) => a + b, 0);
+    const cards = [['학생 수', students.size], ['작품', works.length], ['전시됨', exhibited], ['피드백', fb]];
+    document.getElementById('stats').innerHTML = cards.map(([k, v]) =>
+      `<div class="card" style="text-align:center"><div style="font-size:30px;font-weight:800;color:var(--accent)">${v}</div><div class="muted">${k}</div></div>`).join('');
+  }
+  function filt(list, fields) {
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    const k = document.getElementById('f-kind').value;
+    return list.filter(x => (!k || x.kind === k) && (!q || fields(x).toLowerCase().includes(q)));
+  }
+  function renderWorks() {
+    const rows = filt(works, w => `${w.title} ${w.by} ${w.klass||''} ${w.theme||''}`).map(w => `<tr>
+      <td>${UI.escapeHTML(w.title||'')}</td><td>${UI.escapeHTML(w.by||'')}</td><td>${UI.escapeHTML(w.klass||'')}</td>
+      <td>${KIND[w.kind]||w.kind}</td><td>${w.exhibited?'✅':''}</td>
+      <td><input class="cur-order" data-id="${w.id}" type="number" value="${w.exhibitOrder!=null?w.exhibitOrder:''}" style="width:52px" placeholder="-"></td>
+      <td><input class="cur-theme" data-id="${w.id}" type="text" value="${UI.escapeHTML(w.theme||'')}" style="width:90px" placeholder="테마"></td>
+      <td style="max-width:240px">${UI.escapeHTML((w.intent||'').slice(0,80))}</td>
+      <td>${feedback[w.id]||0}</td><td>${new Date(w.updatedAt).toLocaleString('ko-KR')}</td></tr>`).join('');
+    document.querySelector('#tbl-works tbody').innerHTML = rows || '<tr><td colspan="10" class="muted">데이터 없음</td></tr>';
+  }
+  function renderNotes() {
+    const rows = filt(notes, n => `${n.by} ${n.title}`).map(n => {
+      let s = n.line || n.aiHelp || (n.memos ? Object.values(n.memos).join(' / ') : '') || '';
+      return `<tr><td>${UI.escapeHTML(n.by||'')}</td><td>${KIND[n.kind]||n.kind}</td><td>${UI.escapeHTML(n.title||'')}</td>
+        <td style="max-width:360px">${UI.escapeHTML(String(s).slice(0,120))}</td><td>${new Date(n.updatedAt).toLocaleString('ko-KR')}</td></tr>`;
+    }).join('');
+    document.querySelector('#tbl-notes tbody').innerHTML = rows || '<tr><td colspan="5" class="muted">데이터 없음</td></tr>';
+  }
+
+  document.getElementById('btn-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(Store.exportAll(), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.download = 'class_data_' + Date.now() + '.json'; a.href = URL.createObjectURL(blob); a.click();
+    UI.toast('전체 데이터를 내보냈습니다.');
+  });
+  document.getElementById('btn-import').addEventListener('click', () => document.getElementById('imp').click());
+  document.getElementById('imp').addEventListener('change', async e => {
+    let total = { works: 0, feedback: 0, notes: 0 };
+    for (const f of e.target.files) {
+      try { const d = JSON.parse(await f.text()); const r = Store.importJSON(d); total.works += r.works; total.feedback += r.feedback; total.notes += r.notes; } catch (err) {}
+    }
+    UI.toast(`취합 완료: 작품 ${total.works} · 피드백 ${total.feedback} · 노트 ${total.notes}`); load();
+  });
+  document.getElementById('tbl-works').addEventListener('change', async (e) => {
+    const t = e.target, idv = t.dataset ? t.dataset.id : null; if (!idv) return;
+    const w = works.find(x => x.id === idv); if (!w) return;
+    if (t.classList.contains('cur-order')) w.exhibitOrder = t.value === '' ? null : +t.value;
+    else if (t.classList.contains('cur-theme')) w.theme = t.value.trim();
+    else return;
+    await Store.saveWork(w); UI.toast('큐레이션 저장됨');
+  });
+  document.getElementById('q').addEventListener('input', () => { renderStudents(); renderWorks(); renderNotes(); });
+  document.getElementById('f-kind').addEventListener('change', () => { renderWorks(); renderNotes(); });
+
+  if (!Auth.isTeacher()) UI.toast('교사 계정으로 로그인하면 관리 기능이 모두 열려요(현재는 열람만).');
+  load();
+
+  /* ----------------------------- 실시간 클라우드 연결 점검 ----------------------------- */
+  (async function probeCloud() {
+    const note = document.getElementById('cloud-note');
+    if (Store.mode !== 'cloud') return; // 강제 로컬 등은 기존 메시지 유지
+    try {
+      await window.DN_CLOUD.listWorks();        // 읽기 성공 → 규칙 게시됨
+      note.innerHTML = UI.callout('<b>실시간 공유 연결됨</b> · 같은 링크를 연 학생들의 작품·피드백이 실시간으로 모입니다(project <code>data-art-2026</code>).', 'info');
+    } catch (e) {
+      note.innerHTML = UI.callout('<b>클라우드 연결됨 · 규칙 게시 필요</b> · Firestore가 아직 ‘잠금’이라 읽기/쓰기가 거부됩니다(현재는 로컬 폴백). Firebase 콘솔 → Firestore → 규칙에 <code>config/firestore.rules</code>를 붙여넣고 게시하면 실시간 공유가 켜집니다.', 'warn');
+    }
+  })();
+
+  /* ----------------------------- AI 코치 설정 ----------------------------- */
+  (function coachSettings() {
+    const $ = id => document.getElementById(id);
+    const cfg = Coach.getConfig();
+    $('c-enabled').checked = !!cfg.enabled;
+    $('c-mode').value = cfg.mode === 'proxy' ? 'proxy' : 'direct';
+    if (cfg.model) $('c-model').value = cfg.model;
+    if (cfg.apiKey) $('c-key').value = cfg.apiKey;
+    if (cfg.endpoint) $('c-endpoint').value = cfg.endpoint;
+    syncMode();
+    document.getElementById('coach-warn').innerHTML =
+      UI.callout('키는 <b>이 브라우저(localStorage)에만</b> 저장되고 저장소·서버로 전송되지 않습니다. 무료 한도는 큐가 보호하며, 초과 시 학생 화면엔 자동으로 오프라인 질문이 나갑니다.', 'info');
+
+    function syncMode() {
+      const proxy = $('c-mode').value === 'proxy';
+      $('row-key').classList.toggle('hide', proxy);
+      $('row-endpoint').classList.toggle('hide', !proxy);
+    }
+    function refreshStatus() {
+      const s = Coach.status();
+      $('c-status').textContent = `남은 한도/분 — 요청 ${s.reqLeft} · 입력 ${s.inLeft} · 출력 ${s.outLeft}` + (s.queued ? ` · 대기 ${s.queued}` : '');
+    }
+    setInterval(refreshStatus, 2000); refreshStatus();
+
+    $('c-mode').addEventListener('change', syncMode);
+    $('c-save').addEventListener('click', () => {
+      const c = { enabled: $('c-enabled').checked, mode: $('c-mode').value, model: $('c-model').value,
+        apiKey: $('c-key').value.trim(), endpoint: $('c-endpoint').value.trim() };
+      Coach.setConfig(c);
+      UI.toast(c.enabled ? 'AI 코치 설정 저장 (실제 모델 사용)' : '저장됨 — 오프라인 코치 사용');
+    });
+    $('c-clear').addEventListener('click', () => { Coach.clearConfig(); $('c-enabled').checked = false; $('c-key').value = ''; $('c-endpoint').value = ''; UI.toast('코치 설정을 초기화했습니다.'); });
+    $('c-test').addEventListener('click', async () => {
+      // 저장된 설정 기준으로 1회 호출(샘플 맥락). enabled+키면 실제 모델, 아니면 오프라인.
+      const c = { enabled: $('c-enabled').checked, mode: $('c-mode').value, model: $('c-model').value,
+        apiKey: $('c-key').value.trim(), endpoint: $('c-endpoint').value.trim() };
+      Coach.setConfig(c);
+      UI.modal('🤖 코치 연결 테스트', '<div class="spinner"></div> 호출 중…(한도 대기 시 시간이 걸릴 수 있어요)');
+      const res = await Coach.ask({ kind: 'lab', intent: '연결 테스트', K: 6, palette: [{ r: 210, g: 120, b: 70, ratio: 0.4 }] });
+      const tag = res.source.indexOf('api') === 0 ? '<span class="badge good">실제 모델 응답 OK</span>' : '<span class="badge">오프라인(모델 미사용/폴백)</span>';
+      UI.modal('🤖 코치 연결 테스트 ' + tag,
+        `<div class="lvl-b">${UI.escapeHTML(res.text).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>')}</div>`);
+    });
+  })();
+</script>
+</body>
+</html>

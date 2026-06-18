@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>전시 갤러리 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">전시 갤러리</span>
+    <h1>작품을 감상하고, 근거로 피드백하기</h1>
+    <p>또래의 작품에 <b>의도 전달 · 근거 · 인터랙션 적합 · 윤리</b> 네 기준으로 구조화된 피드백을 남겨 보세요.</p>
+  </div>
+  <div id="idea"></div>
+  <div id="empty" class="callout info hide"><span class="ic">💬</span><div>아직 전시된 작품이 없어요. 스튜디오에서 ‘전시하기’를 눌러 첫 작품을 올려 보세요!</div></div>
+  <div class="gal" id="gal"></div>
+  <p class="footer-note">피드백은 받은 사람이 2차 개선에 쓰는 선물이에요 · 존중하며 남겨 주세요</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/player.js"></script>
+<script>
+  const KIND = { color: '색 군집', data: '데이터 점', lab: '분석' };
+  async function render() {
+    const works = await Store.listWorks({ exhibited: true });
+    document.getElementById('empty').classList.toggle('hide', works.length > 0);
+    document.getElementById('gal').innerHTML = works.map(w => `
+      <div class="item" data-id="${w.id}" style="cursor:pointer">
+        ${w.thumb ? `<img src="${w.thumb}" alt="">` : `<canvas></canvas>`}
+        <div class="meta"><h4>${UI.escapeHTML(w.title || '제목 없음')}</h4>
+          <p>${UI.escapeHTML(w.by || '익명')} · ${KIND[w.kind] || w.kind}</p></div>
+      </div>`).join('');
+    document.querySelectorAll('.item').forEach(el => el.addEventListener('click', () => open(el.dataset.id)));
+  }
+  async function open(id) {
+    const w = await Store.getWork(id);
+    if (!w) return;
+    const fbs = await Store.listFeedback(id);
+    const u = Auth.current();
+    const fbList = fbs.length ? fbs.map(f => `<div class="lvl" style="margin:8px 0"><div class="lvl-b">
+        <b>${UI.escapeHTML(f.by || '익명')}</b> · 의도 ${'★'.repeat(f.intent||0)} 근거 ${'★'.repeat(f.evidence||0)} 인터랙션 ${'★'.repeat(f.interaction||0)} 윤리 ${'★'.repeat(f.ethics||0)}<br>${UI.escapeHTML(f.comment || '')}
+      </div></div>`).join('') : '<p class="muted">아직 피드백이 없어요. 첫 피드백을 남겨 보세요.</p>';
+    const sel = (name) => `<select id="fb-${name}"><option value="3">잘됨 ★★★</option><option value="2" selected>보통 ★★</option><option value="1">아쉬움 ★</option></select>`;
+    const body = `
+      <canvas id="gal-live" style="width:100%;aspect-ratio:4/3;background:#07080d;border-radius:10px;border:1px solid var(--line);display:block"></canvas>
+      <p style="margin:8px 0"><a href="work.html?id=${id}">🔍 단독 페이지·비평(펠드먼 4단계) →</a></p>
+      <p style="margin:12px 0 4px"><b>의도</b> · ${UI.escapeHTML(w.intent || '(없음)')}</p>
+      ${w.evidence ? `<p style="margin:4px 0"><b>근거</b> · ${UI.escapeHTML(w.evidence)}</p>` : ''}
+      ${w.dataName ? `<p class="muted" style="font-size:12px">데이터: ${UI.escapeHTML(w.dataName)}</p>` : ''}
+      <hr class="sep"><h3 style="font-size:15px">또래 피드백</h3>${fbList}
+      <hr class="sep"><h3 style="font-size:15px">피드백 남기기</h3>
+      <div class="grid c4">
+        <div><label class="field">의도 전달</label>${sel('intent')}</div>
+        <div><label class="field">근거</label>${sel('evidence')}</div>
+        <div><label class="field">인터랙션</label>${sel('interaction')}</div>
+        <div><label class="field">윤리</label>${sel('ethics')}</div>
+      </div>
+      <label class="field">한마디(무엇이 의미를 전했나/방해했나, 근거와 함께)</label>
+      <textarea id="fb-comment" rows="2" placeholder="존중하며, 구체적인 근거로"></textarea>
+      <button class="btn primary" id="fb-submit" style="margin-top:10px">피드백 등록</button>`;
+    UI.modal(UI.escapeHTML(w.title || '작품') + ` <span class="badge">${KIND[w.kind] || ''}</span>`, body, UI.escapeHTML(w.by || ''));
+    if (window.Player) { if (window._gP) window._gP.stop(); const gc = document.getElementById('gal-live'); if (gc) window._gP = Player.mount(gc, w, { interactive: true }); const cl = document.querySelector('#ui-modal .modal-close'); if (cl) cl.addEventListener('click', () => window._gP && window._gP.stop()); }
+    document.getElementById('fb-submit').addEventListener('click', async () => {
+      if (!u) { UI.toast('피드백하려면 로그인하세요.'); return; }
+      await Store.addFeedback({ workId: id, by: u.display, userId: u.userId,
+        intent: +document.getElementById('fb-intent').value, evidence: +document.getElementById('fb-evidence').value,
+        interaction: +document.getElementById('fb-interaction').value, ethics: +document.getElementById('fb-ethics').value,
+        comment: document.getElementById('fb-comment').value });
+      UI.toast('피드백을 등록했습니다.'); open(id);
+    });
+  }
+  UI.mountIdeaBar('idea', 'gallery'); render();
+</script>
+</body>
+</html>

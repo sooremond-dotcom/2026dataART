@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>분석 퀴즈 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .qtabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .qtab { font: inherit; font-size: 14px; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 16px; cursor: pointer; }
+  .qtab.on { color: var(--text); border-color: var(--accent); background: rgba(var(--accent-rgb),.12); font-weight: 700; }
+  .qsec { display: none; } .qsec.on { display: block; }
+  .qopt { display: block; width: 100%; text-align: left; margin: 7px 0; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); color: var(--text); cursor: pointer; font: inherit; font-size: 14px; transition: .12s; }
+  .qopt:hover { border-color: var(--accent); }
+  .qopt:disabled { cursor: default; }
+  .qopt.correct { border-color: var(--good); background: rgba(81,216,138,.14); }
+  .qopt.wrong { border-color: var(--danger); background: rgba(255,90,106,.14); }
+  .qopt .sw { display: inline-block; width: 22px; height: 22px; border-radius: 5px; vertical-align: middle; margin-right: 9px; border: 1px solid rgba(255,255,255,.25); }
+  .tag-chip { display: inline-block; font-size: 11.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); cursor: pointer; margin: 3px 3px 0 0; }
+  .tag-chip.on { color: #fff; background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  .qchart canvas, #q-chart-canvas { width: 100%; max-width: 300px; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; }
+  .qimg { display: flex; gap: 8px; }
+  .qimg img { width: 50%; border-radius: 8px; border: 1px solid var(--line); object-fit: cover; }
+  .rank-medal { font-size: 16px; }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">분석 퀴즈</span>
+    <h1>그림을 읽고, 맞히고, 겨루기</h1>
+    <p>친구가 올린 그림·색분석 차트를 보고 <b>지배색·색채 조화·구도</b>를 맞혀 보세요. 직접 <b>출제</b>해 친구들에게 도전장을!</p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="qtabs">
+    <button class="qtab on" data-qtab="play">🎯 퀴즈 풀기</button>
+    <button class="qtab" data-qtab="create">✏️ 출제하기</button>
+    <button class="qtab" data-qtab="rank">🏆 순위</button>
+  </div>
+
+  <!-- 풀기 -->
+  <section class="qsec on" id="qsec-play">
+    <div id="play-empty" class="callout info hide"><span class="ic">🎯</span><div>아직 퀴즈가 없어요. ‘출제하기’에서 첫 문제를 만들어 친구들에게 도전장을 보내세요!</div></div>
+    <div class="gal" id="quiz-list"></div>
+  </section>
+
+  <!-- 출제 -->
+  <section class="qsec" id="qsec-create">
+    <div class="card">
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+        <button id="q-upload" class="btn primary">🖼 이미지 업로드</button>
+        <input id="q-file" type="file" accept="image/*" hidden />
+        <label class="field" style="margin:0">데모
+          <select id="q-demo" style="width:auto; display:inline-block; margin-left:6px">
+            <option value="mondrian">몬드리안</option><option value="starrynight">고흐·별밤</option><option value="monet">모네·수련</option>
+            <option value="seurat">쇠라·점묘</option><option value="rothko">로스코</option><option value="hokusai">호쿠사이</option>
+            <option value="kandinsky">칸딘스키</option><option value="malevich">말레비치</option>
+          </select>
+        </label>
+        <canvas id="q-thumb" width="92" height="70" style="border:1px solid var(--line);border-radius:8px;background:#000"></canvas>
+        <span id="q-busy" class="hide"><span class="spinner"></span></span>
+      </div>
+
+      <div class="grid c2" style="margin-top:14px; align-items:start">
+        <div>
+          <label class="field">문제 유형</label>
+          <select id="q-type">
+            <option value="dominant">지배색 맞히기</option>
+            <option value="harmony">색채 조화 맞히기</option>
+            <option value="temp">색 온도(난색/한색)</option>
+            <option value="composition">구도(무게중심)</option>
+            <option value="free">주관식 — 직접 답 입력(게임형)</option>
+            <option value="custom">직접 만들기(서술형 보기)</option>
+          </select>
+          <label class="field">함께 보여줄 차트</label>
+          <select id="q-chart"><option value="donut">비율 도넛</option><option value="bars">정렬 막대</option><option value="wheel">색상환</option><option value="heatmap">색 분포 히트맵</option></select>
+          <div class="qchart" style="margin-top:8px"><canvas id="q-chart-canvas"></canvas></div>
+        </div>
+        <div>
+          <label class="field">문제</label>
+          <input id="q-question" type="text" placeholder="이미지를 분석하면 자동으로 채워져요(수정 가능)">
+          <div id="q-options-edit" style="margin-top:8px"></div>
+          <label class="field">해설 · 선택 이유 <span class="muted" style="font-size:11px">(정답 공개 후 표시)</span></label>
+          <textarea id="q-explain" rows="2" placeholder="왜 그렇게 분석했는지 근거를 적어요"></textarea>
+          <label class="field">💡 힌트 (선택) — 푸는 사람에게 줄 단서</label>
+          <input id="q-hint" type="text" placeholder="예: 가장 넓은 조각을 보세요">
+          <label class="field">🧑 내 이야기 (선택) — 내 일상/사진이면 들려주세요</label>
+          <input id="q-story" type="text" placeholder="예: 어제 우리 동네 노을을 직접 찍었어요">
+        </div>
+      </div>
+
+      <label class="field">조형 요소 태그(복수 선택)</label>
+      <div id="q-tags"></div>
+      <div class="grid c2" style="margin-top:8px">
+        <div><label class="field">제목</label><input id="q-title" type="text" placeholder="예: 이 작품의 지배색은?"></div>
+        <div><label class="field">난이도</label><select id="q-diff"><option>쉬움</option><option selected>보통</option><option>어려움</option></select></div>
+      </div>
+      <button id="q-submit" class="btn accent2" style="margin-top:14px">📤 퀴즈 출제</button>
+      <p class="muted" style="font-size:11.5px;margin-top:8px">출제하려면 로그인하세요. 자동 문제는 분석 결과가 ‘정답’이지만, 분석도 손실 있는 근사임을 기억해요(해설에 근거를!).</p>
+    </div>
+  </section>
+
+  <!-- 순위 -->
+  <section class="qsec" id="qsec-rank">
+    <div class="card" style="overflow-x:auto">
+      <h3>🏆 정답 순위</h3>
+      <table class="data" id="rank-table"><thead><tr><th>순위</th><th>이름</th><th>맞힘</th><th>시도</th><th>정답률</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card" style="margin-top:14px;overflow-x:auto">
+      <h3>✏️ 출제왕</h3>
+      <table class="data" id="author-table"><thead><tr><th>이름</th><th>출제 수</th><th>받은 풀이</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <p class="footer-note">분석은 정답이 아니라 해석이에요 · 맞히기보다 ‘왜’를 함께 이야기해요</p>
+</div>
+
+<script src="js/kmeans.js"></script>
+<script src="js/analysis.js"></script>
+<script src="js/algos/algorithms.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/harmony.js"></script>
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/quiz.js"></script>
+</body>
+</html>

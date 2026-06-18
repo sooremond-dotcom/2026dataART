@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>키오스크 전시 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  body { overflow: hidden; }
+  .stage { display: grid; grid-template-columns: 1.35fr 1fr; height: calc(100vh - 56px); }
+  .stage .art { display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, #0e1018, #050609); padding: 4vh 3vw; }
+  .stage .art img { max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 24px 70px rgba(0,0,0,.65); }
+  .stage .info { padding: 5vh 3vw; display: flex; flex-direction: column; justify-content: center; gap: 16px; overflow-y: auto; border-left: 1px solid var(--line); }
+  .stage .info .eyebrow2 { color: var(--accent); font-weight: 700; letter-spacing: .1em; font-size: 13px; }
+  .stage .info h1 { font-size: clamp(24px, 3vw, 40px); margin: 0; letter-spacing: -.5px; }
+  .stage .info .artist { color: var(--accent2); font-size: clamp(15px,1.4vw,20px); font-weight: 700; }
+  .stage .info .statement { font-size: clamp(14px,1.15vw,18px); line-height: 1.7; }
+  .stage .info .meta { color: var(--muted); font-size: 13px; }
+  .qr-box { display: flex; gap: 16px; align-items: center; margin-top: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; width: fit-content; }
+  .qr-box canvas { border-radius: 8px; display: block; }
+  .qr-box .cap { font-size: 12.5px; color: var(--muted); max-width: 220px; }
+  .qr-box .cap b { color: var(--text); }
+  .controls { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center;
+    background: rgba(17,21,33,.92); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; z-index: 30; backdrop-filter: blur(8px); }
+  .controls .counter { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; padding: 0 6px; }
+  .controls button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel2); color: var(--text); cursor: pointer; font-size: 15px; }
+  .controls button:hover { border-color: var(--accent); }
+  .progress { position: fixed; top: 56px; left: 0; height: 3px; background: var(--accent); width: 0; z-index: 30; transition: width .2s linear; }
+  .empty { display: flex; align-items: center; justify-content: center; height: calc(100vh - 56px); }
+  @media (max-width: 820px) { body { overflow: auto; } .stage { grid-template-columns: 1fr; height: auto; } .stage .info { border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="progress" id="progress"></div>
+<div id="kroot"><div class="empty"><span class="spinner"></span></div></div>
+<div class="controls" id="controls" hidden>
+  <button id="k-prev" title="이전(←)">◀</button>
+  <button id="k-play" title="재생/정지(Space)">⏸</button>
+  <button id="k-next" title="다음(→)">▶</button>
+  <select id="k-theme" class="hide" style="background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font:inherit;font-size:12.5px"></select>
+  <span class="counter" id="k-counter">0 / 0</span>
+  <button id="k-full" title="전체화면(F)">⛶</button>
+  <button id="k-base" title="QR 주소 설정">🔗</button>
+</div>
+
+<script src="vendor/qrcode.min.js"></script>
+<script src="js/qr.js"></script>
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/docent.js"></script>
+<script src="js/player.js"></script>
+<script src="js/exhibit.js"></script>
+</body>
+</html>

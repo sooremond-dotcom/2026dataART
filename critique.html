@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>데이터 비평 읽기 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  #crit-canvas { width: 100%; height: 320px; background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; display: block; }
+  .axis-toggle { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap narrow">
+  <div class="page-head">
+    <span class="eyebrow">데이터 비평 읽기</span>
+    <h1>차트에도 ‘작가’가 있다</h1>
+    <p>데이터는 객관적 사실 같지만, 누군가의 <b>선택</b>이에요. 같은 데이터라도 <b>축·척도·색</b>을 바꾸면 이야기가 달라집니다. 회화의 색·형·구도를 읽듯, 데이터의 <b>척도·생략·수사</b>를 읽어 봐요. <span class="info-ic" data-info="data-humanism">ⓘ</span></p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="card">
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+      <label class="field" style="margin:0">데이터
+        <select id="crit-data" style="width:auto; display:inline-block; margin-left:6px">
+          <option value="climate">기후위기 · 한반도 평균기온</option>
+          <option value="finedust">대기오염 · 월별 초미세먼지</option>
+          <option value="inequality">소득 불평등 · 분위별 월소득</option>
+        </select>
+      </label>
+    </div>
+    <div class="axis-toggle">
+      <button class="btn sm on" id="ax-zero" data-ax="zero">📏 축 0부터 (정직)</button>
+      <button class="btn sm" id="ax-cut" data-ax="cut">✂️ 축 잘라서 (극적으로)</button>
+      <span class="muted" style="font-size:12px; align-self:center" id="crit-source"></span>
+    </div>
+    <canvas id="crit-canvas" width="800" height="320"></canvas>
+    <p class="callout warn" id="crit-rhetoric" style="margin-top:12px"></p>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>비평 — 질문 3층위 <span class="info-ic" data-info="data-humanism">ⓘ</span></h3>
+    <p class="muted" style="font-size:12.5px;margin:0 0 8px">먼저 “무엇이 눈에 들어오고 무엇이 느껴지나”를 자기 말로. 그다음 아래로 내려가요.</p>
+    <label class="field">① 사실적 — 무엇이 ‘세어졌나’? 무엇이 축·단위인가?</label>
+    <textarea id="q1" rows="2" placeholder="예: 가로=연도, 세로=평균기온(℃). 한 해 평균만 셌고 계절·지역 차이는 빠짐"></textarea>
+    <label class="field">② 해석적 — 왜 이렇게 표현했나? 누가 무엇을 ‘빼기로’ 했나? 왜 이 축·색·척도인가?</label>
+    <textarea id="q2" rows="2" placeholder="예: 축을 0부터 두면 완만, 잘라 보면 급격. 같은 데이터인데 인상이 달라진다"></textarea>
+    <label class="field">③ 가치·전이 — 무엇을 주장하고 무엇을 감추나? 내 삶의 어떤 진실을 놓치나? 나는 어떻게 응답할까?</label>
+    <textarea id="q3" rows="3" placeholder="예: ‘위기’를 강조하지만 원인·책임은 안 보임. 나는 이 문제를 작품으로 어떻게 보여줄까?"></textarea>
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+      <button id="crit-save" class="btn primary">비평 저장(작업노트)</button>
+      <a class="btn" href="studio-data.html">→ 데이터로 작품 만들기</a>
+    </div>
+  </div>
+  <p class="footer-note">데이터·이미지는 사회현상을 드러내는 시각자료 · 미술은 이를 비판적으로 재구성해 공동체와 소통하는 사회참여가 됩니다</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/critique.js"></script>
+</body>
+</html>

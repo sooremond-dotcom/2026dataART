@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>사회문제 프로젝트 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .step { border-left: 3px solid var(--accent); }
+  .step .n { display: inline-flex; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; align-items: center; justify-content: center; font-size: 13px; margin-right: 8px; }
+  .src-links a { display: inline-block; margin: 3px 8px 3px 0; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap narrow">
+  <div class="page-head">
+    <span class="eyebrow">사회문제 프로젝트 · 학습 4단계</span>
+    <h1>데이터로 말하는 사회</h1>
+    <p>관심 있는 <b>사회 문제</b>를 정하고, 공공데이터를 찾아 정제해 작품으로. 여기서 미술은 개인 표현을 넘어 <b>사회적 발언</b>이 됩니다 — “이 문제를 세상에 어떻게 보여줄 것인가”가 작품의 주제예요.</p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="card step" style="margin-bottom:14px">
+    <h3><span class="n">1</span>주제 선정</h3>
+    <label class="field">관심 있는 사회 문제</label>
+    <select id="pj-topic">
+      <option value="기후위기">🌡 기후위기</option>
+      <option value="소득 불평등">⚖ 소득 불평등</option>
+      <option value="동물권">🐾 동물권</option>
+      <option value="지역소멸">🏚 지역소멸</option>
+      <option value="대기오염">😷 대기오염</option>
+      <option value="기타">✏️ 직접 입력</option>
+    </select>
+    <input id="pj-topic-custom" type="text" placeholder="직접 입력(기타 선택 시)" style="margin-top:8px; display:none">
+    <label class="field">왜 이 문제인가요? (나와의 연결)</label>
+    <textarea id="pj-why" rows="2" placeholder="예: 우리 동네 미세먼지가 심해 체육을 못 한 날이 많았다"></textarea>
+  </div>
+
+  <div class="card step" style="margin-bottom:14px">
+    <h3><span class="n">2</span>데이터 찾기 (공공데이터)</h3>
+    <p class="muted" style="font-size:12.5px;margin:0 0 6px">공공데이터에서 관련 표를 찾아 CSV로 받아 붙여넣어요. ‘무엇을 셀지’ 고르는 것부터 시작이에요.</p>
+    <div class="src-links">
+      <a href="https://www.data.go.kr" target="_blank" rel="noopener">공공데이터포털 ↗</a>
+      <a href="https://kosis.kr" target="_blank" rel="noopener">KOSIS 통계 ↗</a>
+      <a href="https://data.seoul.go.kr" target="_blank" rel="noopener">서울 열린데이터 ↗</a>
+      <a href="https://www.index.go.kr" target="_blank" rel="noopener">e-나라지표 ↗</a>
+    </div>
+    <label class="field" style="margin-top:8px">데이터 붙여넣기 / CSV (첫 줄 머리글)</label>
+    <textarea id="pj-data" rows="4" placeholder="연도,값&#10;2018,121000&#10;2019,135000"></textarea>
+    <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap">
+      <button id="pj-upload" class="btn sm">CSV 열기</button>
+      <input id="pj-file" type="file" accept=".csv,text/csv,text/plain" hidden />
+      <span id="pj-data-info" class="muted" style="font-size:12px; align-self:center"></span>
+    </div>
+  </div>
+
+  <div class="card step" style="margin-bottom:14px">
+    <h3><span class="n">3</span>정제 · 데이터 선택 기록</h3>
+    <label class="chk-row"><input type="checkbox" id="pj-c1"> 결측치(빈 값)를 어떻게 처리할지 정했다</label>
+    <label class="chk-row"><input type="checkbox" id="pj-c2"> 이상치(튀는 값)·단위를 확인했다</label>
+    <label class="chk-row"><input type="checkbox" id="pj-c3"> 표본·출처·기간의 한계를 적었다</label>
+    <label class="field">무엇을 일부러 뺐/강조했나요? (숨긴 선택)</label>
+    <input id="pj-omit" type="text" placeholder="예: 코로나 시기는 예외라 제외, 최근 5년만">
+  </div>
+
+  <div class="card step" style="margin-bottom:14px">
+    <h3><span class="n">4</span>작품으로</h3>
+    <p class="muted" style="font-size:12.5px;margin:0 0 8px">정제한 데이터를 점 작품으로 — 무엇을 크기·색·움직임으로 강조할지가 곧 메시지예요.</p>
+    <button id="pj-send" class="btn accent2">→ 데이터 점 스튜디오로 보내기</button>
+  </div>
+
+  <div class="card step">
+    <h3><span class="n">5</span>사회적 발언 (작품 주제문)</h3>
+    <label class="field">이 문제를 세상에 어떻게 보여줄 것인가? (한두 문장)</label>
+    <textarea id="pj-statement" rows="3" placeholder="예: 늘어나는 유기동물 점이 화면 밖으로 쏟아지게 해, 외면하면 더 커진다는 걸 보여주고 싶다"></textarea>
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+      <button id="pj-save" class="btn primary">프로젝트 저장(작업노트)</button>
+    </div>
+  </div>
+  <p class="footer-note">데이터·이미지는 사회현상을 드러내는 시각자료 · 미술은 이를 비판적으로 재구성해 공동체와 소통하는 사회참여가 됩니다</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/project.js"></script>
+</body>
+</html>

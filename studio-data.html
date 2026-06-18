@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>데이터 점 스튜디오 · 데이터가 춤추는 점</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .dstudio { display: grid; grid-template-columns: 1fr 350px; gap: 16px; align-items: start; }
+  #dstage { position: relative; background: #07080d; border: 1px solid var(--line); border-radius: 14px; height: 70vh; min-height: 460px; overflow: hidden; }
+  #dstage canvas { display: block; }
+  .dpanel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; max-height: 78vh; overflow-y: auto; }
+  .dpanel details { border-bottom: 1px solid var(--line); }
+  .dpanel summary { cursor: pointer; padding: 12px 15px; font-weight: 700; font-size: 13.5px; list-style: none; }
+  .dpanel summary::-webkit-details-marker { display: none; }
+  .dpanel .sect { padding: 4px 15px 16px; }
+  @media (max-width: 880px) { .dstudio { grid-template-columns: 1fr; } #dstage { height: 52vh; } }
+  .map-grid { display: flex; flex-direction: column; gap: 7px; }
+  .map-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+  .map-row > span:first-child { flex: 0 0 52px; color: var(--muted); }
+  .map-row select { flex: 1; }
+  .field-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .field-chips .chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .field-chips .chip.num { color: var(--accent2); border-color: rgba(78,195,255,.4); }
+  .field-chips .chip.cat { color: var(--good); border-color: rgba(81,216,138,.4); }
+  #label-config { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .label-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  input[type=color] { width: 42px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+
+<div class="wrap" style="max-width:1280px">
+  <div class="page-head">
+    <span class="eyebrow">데이터 점 스튜디오 · 1단계 기초</span>
+    <h1>데이터가 춤추는 점</h1>
+    <p>우리 데이터(여러 열)를 점의 <b>크기·속도·방향·밀도·투명도·형태·색</b>으로 번역해 움직이는 작품으로. <b>어떤 열을 어떻게</b> 매핑할지 직접 설계하세요 — 매핑은 ‘효과’가 아니라 <b>해석</b>이에요.</p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="dstudio">
+    <section id="dstage"></section>
+
+    <aside class="dpanel">
+      <details open>
+        <summary>1 · 데이터</summary>
+        <div class="sect">
+          <label class="field">샘플 데이터</label>
+          <select id="sel-sample">
+            <option value="climate">🌡 기후위기 · 평균기온</option>
+            <option value="finedust">😷 대기오염 · 미세먼지</option>
+            <option value="inequality">⚖ 소득 불평등</option>
+            <option value="extinction">🏚 지역소멸 · 인구</option>
+            <option value="animal">🐾 동물권 · 유기동물</option>
+            <option value="emotion">🙂 (개인) 우리 반 감정</option>
+          </select>
+          <label class="field" style="margin-top:10px">직접 입력 / 붙여넣기 (CSV·숫자) <span class="info-ic" data-info="data-clean">ⓘ</span></label>
+          <textarea id="ta-data" rows="4" placeholder="첫 줄에 열 이름(머리글)도 가능:&#10;시간,감정온도,활동&#10;9시,3,수업&#10;10시,4,발표"></textarea>
+          <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap">
+            <button id="btn-apply-data" class="btn sm">적용</button>
+            <button id="btn-upload-csv" class="btn sm">CSV 열기</button>
+            <button id="btn-template" class="btn sm ghost" title="작성 양식(CSV)을 내려받아 채워 오세요">⬇ 양식 받기</button>
+            <input id="csv" type="file" accept=".csv,text/csv,text/plain" hidden />
+          </div>
+          <p class="muted" id="data-info" style="font-size:11.5px; margin-top:8px"></p>
+          <p id="data-issue" style="font-size:11.5px; color:var(--good); margin:4px 0 0"></p>
+          <div id="field-list" class="field-chips"></div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>2 · 매핑 설정 — 무엇을 어떻게</summary>
+        <div class="sect">
+          <p class="muted" style="font-size:12px;margin:0 0 8px">데이터의 <b>어떤 열</b>을 점의 <b>어떤 특성</b>으로 바꿀지 골라요. (크기·속도·방향·밀도·투명도는 수치 열)</p>
+          <div class="map-grid">
+            <div class="map-row"><span>크기 ←</span><select id="map-size" data-map="size"></select><span class="info-ic" data-info="map-size">ⓘ</span></div>
+            <div class="map-row"><span>속도 ←</span><select id="map-speed" data-map="speed"></select><span class="info-ic" data-info="map-speed">ⓘ</span></div>
+            <div class="map-row"><span>방향 ←</span><select id="map-dir" data-map="direction"></select><span class="info-ic" data-info="map-direction">ⓘ</span></div>
+            <div class="map-row"><span>밀도 ←</span><select id="map-density" data-map="density"></select><span class="info-ic" data-info="map-density">ⓘ</span></div>
+            <div class="map-row"><span>투명도 ←</span><select id="map-alpha" data-map="alpha"></select><span class="info-ic" data-info="map-alpha">ⓘ</span></div>
+            <div class="map-row"><span>형태 ←</span><select id="map-shape" data-map="shape"></select><span class="info-ic" data-info="map-shape">ⓘ</span></div>
+          </div>
+          <hr class="sep" style="margin:12px 0">
+          <label class="field">색 방식 (색은 색상환에서 직접 선택)</label>
+          <select id="map-colormode">
+            <option value="gradient">수치 → 색 그라데이션</option>
+            <option value="category">범주(라벨)별 색 지정</option>
+            <option value="solid">단색</option>
+          </select>
+          <div id="color-field-row" class="map-row" style="margin-top:8px"><span>기준 열 ←</span><select id="map-colorfield"></select></div>
+          <div id="color-grad" style="display:flex;gap:14px;margin-top:8px;align-items:center">
+            <label style="font-size:12px">낮음 <input type="color" id="map-gradlow" value="#2e86de"></label>
+            <label style="font-size:12px">높음 <input type="color" id="map-gradhigh" value="#ff5a5f"></label>
+          </div>
+          <div id="color-solid" style="margin-top:8px;display:none"><label style="font-size:12px">색 <input type="color" id="map-solid" value="#ffb454"></label></div>
+          <div id="label-config"></div>
+          <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+            <button id="btn-ruleA" class="btn sm">규칙 A 저장</button>
+            <button id="btn-ruleB" class="btn sm">규칙 B 저장</button>
+            <button id="btn-ab" class="btn sm">A/B 전환</button>
+          </div>
+          <div id="ab-summary" style="font-size:11.5px; margin-top:6px; line-height:1.65"></div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>3 · 움직임 · 잔상</summary>
+        <div class="sect">
+          <label class="field">기본 속도 <output id="o-speed">1</output></label><input id="r-speed" type="range" min="0" max="3" step="0.1" value="1">
+          <label class="field">진동 <output id="o-vib">1</output></label><input id="r-vib" type="range" min="0" max="4" step="0.1" value="1">
+          <label class="field">잔상(트레일) <output id="o-trail">200</output></label><input id="r-trail" type="range" min="20" max="255" step="5" value="200">
+          <label class="field">점 크기 배율 <output id="o-pscale">1</output></label><input id="r-pscale" type="range" min="0.3" max="3" step="0.1" value="1" title="모든 점의 크기를 한꺼번에 키우거나 줄여요(매핑된 크기에 곱해져요).">
+          <label class="field">응집력(제자리로) <output id="o-coh">1</output></label><input id="r-coh" type="range" min="0.2" max="2.5" step="0.1" value="1" title="점이 제 자리(배치)로 돌아가려는 힘 — 크면 단단히 모이고, 작으면 느슨히 흩어져 떠돌아요.">
+          <label class="field">배치(어디에) <span class="info-ic" data-info="data-layout">ⓘ</span></label>
+          <select id="sel-layout">
+            <option value="timeline">시간축 (가로 흐름)</option>
+            <option value="radial">원형 (시계 배열)</option>
+            <option value="grid">격자</option>
+            <option value="flowField">값 산포 (가로=순서·세로=크기값)</option>
+          </select>
+          <label class="field">움직임 방식 (어떻게) <span class="info-ic" data-info="data-motion">ⓘ</span></label>
+          <select id="sel-motionstyle">
+            <option value="vibrate">제자리 진동 (기본)</option>
+            <option value="orbit">궤도 (제자리 주위 회전)</option>
+            <option value="wave">파동 (시간 따라 출렁)</option>
+            <option value="burst">분출 (방향대로 흐름)</option>
+          </select>
+          <label class="field">배경</label>
+          <select id="sel-data-bg" title="작품이 놓이는 '공기' — 어두운 배경은 점이 또렷, 밝은 배경(종이·흰색)은 전시·인쇄 느낌.">
+            <option value="night">갤러리 남색(기본)</option>
+            <option value="black">순흑</option>
+            <option value="ink">잉크 보라</option>
+            <option value="slate">슬레이트 회청</option>
+            <option value="paper">따뜻한 종이</option>
+            <option value="white">전시 흰색</option>
+          </select>
+          <p class="muted" style="font-size:11.5px;margin-top:8px">속도·방향은 ‘변화량(데이터가 얼마나 변했나)’으로 움직여요. <b>배치</b>=점이 어디에 살지, <b>움직임 방식</b>=어떤 식으로 움직일지, <b>응집력</b>=얼마나 단단히 모일지 — 데이터의 특성이 곧 움직임이 됩니다.</p>
+        </div>
+      </details>
+
+      <details open>
+        <summary>4 · 데이터 선택 기록 (제작 문서) <span class="info-ic" data-info="data-humanism">ⓘ</span></summary>
+        <div class="sect">
+          <p class="muted" style="font-size:12px;margin:0 0 8px">‘객관적 데이터’ 뒤의 <b>나의 선택</b>을 적어요. 무엇을 세고 무엇을 뺐는지가 곧 창작이에요(프롬프트=작가노트처럼).</p>
+          <label class="field">① 감각 먼저 — 데이터가 되기 전, 이 주제를 몸으로 어떻게 느꼈나요?</label>
+          <textarea id="rec-sense" rows="2" placeholder="예: 시험 주간 일주일, 쉬는 시간마다 한숨이 늘었다"></textarea>
+          <label class="field">② 무엇을 ‘셌’나요? (셈의 단위·기준)</label>
+          <input id="rec-count" type="text" placeholder="예: 1시간마다 감정온도를 1~5로 기록">
+          <label class="field">③ 무엇을 일부러 뺐/숨겼나요? (생략된 선택)</label>
+          <input id="rec-omit" type="text" placeholder="예: 점심시간·개인적인 이유는 제외">
+          <label class="field">④ 왜 이 척도·축·색·매핑인가요?</label>
+          <input id="rec-scale" type="text" placeholder="예: 변화가 큰 순간을 빠른 움직임으로">
+          <label class="field">⑤ 이 데이터가 놓친 ‘내 삶의 진실’은? (메타비평)</label>
+          <textarea id="rec-miss" rows="2" placeholder="예: 숫자로는 평온해 보이지만 사실 가장 불안했다"></textarea>
+        </div>
+      </details>
+
+      <details open>
+        <summary>5 · 의도 · 근거 <span class="badge core">저장 전 필수</span></summary>
+        <div class="sect">
+          <label class="field">데이터 주제(무엇의 데이터인가)</label>
+          <input id="in-dataname" type="text" placeholder="예: 우리 반 하루 감정 온도">
+          <label class="field">관람 경험 목표(의도, 한 문장)</label>
+          <input id="in-intent" type="text" placeholder="예: 시험기간의 들썩이는 마음을 점의 떨림으로">
+          <label class="field">조형/데이터 근거(최소 1개)</label>
+          <textarea id="in-evidence" rows="2" placeholder="예: 4교시에 변화가 가장 커서 그 구간 점을 빠르게 진동시켰다"></textarea>
+        </div>
+      </details>
+
+      <details open>
+        <summary>6 · 코치 · 저장 · 공유</summary>
+        <div class="sect">
+          <button id="btn-coach" class="btn wide" style="margin-bottom:8px">🧭 감상 코치에게 질문받기</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap">
+            <button id="btn-img" class="btn sm">이미지 저장</button>
+            <button id="btn-note" class="btn sm">작업노트 저장</button>
+            <button id="btn-exhibit" class="btn sm accent2">전시하기</button>
+          </div>
+          <p class="muted" style="font-size:11.5px; margin-top:8px">⚠ 개인 데이터는 익명·집계로! 낙인찍지 않도록 설명은 상황·맥락 중심으로.</p>
+        </div>
+      </details>
+    </aside>
+  </div>
+  <p class="footer-note">인터랙션은 효과가 아니라 해석이에요 · 표본 수·한계를 작품 설명에 밝히세요</p>
+</div>
+
+<script src="vendor/p5.min.js"></script>
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="config/cloud-config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ratelimit.js"></script>
+<script src="js/coach.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/studio-data.js"></script>
+</body>
+</html>

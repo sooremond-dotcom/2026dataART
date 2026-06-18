@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>객체 감지 · AI의 눈 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  #odstage-wrap { position: relative; border: 1px dashed var(--line); border-radius: 12px; padding: 8px; background: #07080d; }
+  #odstage-wrap.drop { border-color: var(--accent); background: rgba(255,138,0,.08); }
+  #odstage { width: 100%; max-height: 56vh; object-fit: contain; display: block; border-radius: 8px; background: #07080d; }
+  .od-chip { display: inline-block; font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); margin: 2px 2px 0 0; }
+  .od-warn { color: var(--danger) !important; }
+  .od-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .limit-grid { grid-template-columns: 1fr; } }
+  #od-art { width: 100%; height: 360px; background: #07080d; border: 1px solid var(--line); border-radius: 12px; display: block; }
+  .art-modal { position: fixed; inset: 0; background: rgba(4,5,10,.72); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 18px; }
+  .art-modal[hidden] { display: none; }
+  .art-modal-box { position: relative; max-width: 600px; max-height: 84vh; overflow: auto; background: var(--panel, #11131d); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: 0 18px 60px rgba(0,0,0,.5); }
+  .art-modal-x { position: absolute; top: 12px; right: 14px; background: none; border: none; color: var(--muted, #9aa3bd); font-size: 20px; cursor: pointer; }
+  .art-modal-box .map-row { display: flex; gap: 8px; padding: 5px 0; border-top: 1px dashed var(--line); font-size: 13px; }
+  .art-modal-box .map-row b { color: var(--accent2, #ffb454); min-width: 92px; }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">객체 감지 렌즈 · AI의 눈</span>
+    <h1>그림·사진 속 ‘무엇이 있나’를 데이터로</h1>
+    <p>브라우저 속 AI(<b>COCO-SSD</b>)가 사진에서 사물(사람·자동차·개… 80범주)을 찾아 <b>네모와 라벨</b>로 표시하고, 이를 <b>점·데이터</b>로 바꿔요.
+      <span class="with-info">그런데 AI는 무엇을 보고, 무엇을 <b>못</b> 볼까요? <span class="info-ic" data-info="object-detection">ⓘ</span></span></p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="grid c2" style="align-items:start">
+    <div class="card">
+      <h3>1 · 이미지 넣기</h3>
+      <div class="od-tools">
+        <button id="btn-od-upload" class="btn primary">📷 사진 업로드</button>
+        <button id="btn-od-street" class="btn">🛣 오프라인 예시 장면</button>
+        <select id="sel-od-art" class="btn" style="padding:8px">
+          <option value="">🖼 명화로 시험…</option>
+          <option value="monalisa">다 빈치 · 모나리자</option>
+          <option value="pearl">베르메르 · 진주 귀고리 소녀</option>
+          <option value="starrynight">고흐 · 별이 빛나는 밤</option>
+          <option value="seurat">쇠라 · 그랑드자트섬의 일요일</option>
+          <option value="hokusai">호쿠사이 · 큰 파도</option>
+          <option value="scream">뭉크 · 절규</option>
+          <option value="klimt">클림트 · 키스</option>
+          <option value="kandinsky">칸딘스키 · 구성 7</option>
+        </select>
+        <input id="od-file" type="file" accept="image/*" hidden />
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px">
+        <button id="btn-od-detect" class="btn accent2">🤖 AI로 사물 감지</button>
+        <button id="btn-od-cam" class="btn">📹 실시간 카메라</button>
+      </div>
+      <p class="muted" style="font-size:11.5px;margin-top:8px">
+        AI 모델은 <b>처음 한 번만</b> 인터넷에서 받아와요(약 5–6MB · 한 CDN이 막히면 다른 CDN으로 자동 재시도). 이미지·영상은 <b>브라우저 안에서만</b> 처리하고 어디에도 올리지 않아요.<br>
+        📹 <b>실시간 카메라</b>는 <b>휴대폰에서도</b> 돼요 — HTTPS(이 사이트) 주소에서 카메라 권한을 허용하면 뒷카메라로 사물을 비추며 실시간 감지. (모델 다운로드가 되는 네트워크여야 해요.)<br>
+        <span id="od-status" class="muted"></span></p>
+    </div>
+
+    <div class="card">
+      <h3>3 · 데이터 선택 기록 <span class="info-ic" data-info="data-humanism">ⓘ</span></h3>
+      <label class="field">이 사물들로 나는 <b>무엇을</b> 보여주고 싶나요?</label>
+      <textarea id="od-intent" rows="2" placeholder="예: 거리에 ‘사람보다 자동차가 많은’ 풍경을, 도시의 속도를"></textarea>
+      <label class="field">AI가 <b>놓친 것/잘못 본 것</b>은? (메타비평)</label>
+      <input id="od-omit" type="text" placeholder="예: 손잡고 가는 ‘관계’는 못 봄 · 그림자를 사물로 오인">
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>2 · 감지 결과</h3>
+    <div id="odstage-wrap"><canvas id="odstage" width="720" height="480"></canvas></div>
+    <p id="od-summary" class="callout info" style="margin-top:12px"></p>
+    <div class="od-tools" style="margin-top:4px">
+      <button id="btn-od-csv" class="btn" disabled>⬇ CSV 내보내기</button>
+      <button id="btn-od-send" class="btn accent2" disabled>→ 데이터 점 스튜디오로 보내기</button>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin-top:8px">보내면 <b>사물·중심x·중심y·크기·신뢰도</b> 열로 데이터 점 스튜디오에서 더 깊이 다룰 수 있어요. 또는 바로 아래에서 ‘춤추는 점’으로 봐요.</p>
+  </div>
+
+  <div class="card" id="od-art-card" style="margin-top:16px">
+    <h3>✦ 춤추는 점 — 감지된 사물이 사진에서 떠올라요
+      <button id="btn-od-art-info" class="btn ghost" style="font-size:12px; padding:3px 10px; margin-left:6px">ⓘ 어떻게?</button>
+    </h3>
+    <p class="muted" style="font-size:11.5px; margin:2px 0 10px">AI가 찾은 사물 하나하나가 <b>점</b>이 돼요 — <b>사진 속 제 위치</b>에서 떠오르고, <b>박스 크기 → 점 크기</b>, <b>사물 종류 → 색</b>, 그리고 <b>신뢰도가 낮을수록 더 떨려요</b>(AI의 망설임이 그대로 흔들림이 됩니다).</p>
+    <canvas id="od-art" width="900" height="360"></canvas>
+    <div class="od-tools" style="margin-top:10px">
+      <label class="field" style="margin:0">움직임
+        <select id="od-art-motion">
+          <option value="hover">제자리 떠오름 — 본디 자리에서 떨며 떠요</option>
+          <option value="swarm">군무 — 한데 모여 함께 흐르기</option>
+          <option value="rise">상승 — 거품처럼 떠올라요</option>
+        </select>
+      </label>
+      <label class="chk" style="margin:0"><input id="od-art-label" type="checkbox" checked /> 이름표 보이기</label>
+      <button id="od-art-play" class="btn">⏸ 멈춤</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3 class="with-info">🔎 ‘AI의 눈’ 비평 — 무엇을 보고 무엇을 못 보나 <span class="info-ic" data-info="object-detection">ⓘ</span></h3>
+    <div class="limit-grid">
+      <div><b style="color:var(--good)">볼 수 있는 것</b><p class="muted" style="font-size:13px;margin:6px 0 0">학습한 <b>80개 범주</b>(사람·탈것·동물·일상 사물)와 그 <b>위치·크기</b>. 사진 같은 일상 장면에서 잘 작동해요.</p></div>
+      <div><b style="color:var(--danger)">못 보는 것</b><p class="muted" style="font-size:13px;margin:6px 0 0">범주 밖의 것, <b>관계·감정·맥락</b>, 그리고 <b>명화·추상화</b>(사진으로 배워서). 그림자·반사를 사물로 <b>오인</b>하기도 해요.</p></div>
+    </div>
+    <p class="hint" style="margin-top:10px">그래서 ‘감지 0’이나 ‘엉뚱한 감지’도 <b>실패가 아니라 데이터</b>예요 — “AI는 세상을 <b>자기가 배운 범주로만</b> 본다”는 걸 드러내니까요. 도구의 눈을 의심하는 것, 그게 데이터 시대의 미술이 하는 일이에요.</p>
+  </div>
+
+  <p class="footer-note">도구는 의도를 ‘대체’하지 않고 ‘뒤따른다’ · AI가 본 것 위에, 내가 무엇을 말할지를 얹어요</p>
+</div>
+
+<div id="od-art-modal" class="art-modal" hidden>
+  <div class="art-modal-box">
+    <button id="od-art-modal-x" class="art-modal-x" aria-label="닫기">✕</button>
+    <h3 style="margin-top:0">감지된 사물이 어떻게 ‘춤추는 점’이 되나요?</h3>
+    <p style="font-size:13px; color:var(--muted,#9aa3bd); margin:0 0 12px">AI는 사물마다 <b>네모(박스)·이름·신뢰도</b>를 내놓아요. 그 숫자들을 점의 <b>위치·크기·색·떨림</b>으로 바꾸면, 사진이 살아 움직이는 작품이 됩니다.</p>
+    <div class="map-row"><b>위치</b><span>박스의 <b>중심(x, y)</b> → 점이 사진 속 그 자리에서 떠올라요. 구도가 그대로 살아나요.</span></div>
+    <div class="map-row"><b>크기</b><span>박스가 <b>클수록</b>(화면을 많이 차지할수록) 점이 커져요.</span></div>
+    <div class="map-row"><b>색</b><span>사물의 <b>종류</b>마다 다른 색 — 같은 사람끼리, 같은 차끼리 같은 빛.</span></div>
+    <div class="map-row"><b>떨림</b><span><b>신뢰도가 낮을수록</b> 더 많이 흔들려요. ‘이게 맞나…?’ 하는 AI의 <b>망설임</b>이 눈에 보이는 떨림이 됩니다.</span></div>
+    <p style="font-size:13px; margin:14px 0 0; padding-top:12px; border-top:1px solid var(--line)"><b>그래서 무엇을 말할까요?</b> AI가 또렷이 본 것은 단단히, 흐릿하게 본 것은 떨리게 — “도구가 <b>확신하는 것과 망설이는 것</b>”을 한 화면에서 보여 줄 수 있어요. 감지 0개일 땐 텅 빈 화면 그 자체가 ‘AI가 못 보는 세계’에 대한 발언이 되고요.</p>
+  </div>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/analysis.js"></script>
+<script src="js/studio-object.js"></script>
+</body>
+</html>

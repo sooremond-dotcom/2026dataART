@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>학습 여정 지도 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .stage-row { display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: stretch; margin-bottom: 12px; }
+  .stage-n { display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; color: #fff;
+    background: var(--accent); border-radius: 14px; }
+  .stage-card { display: flex; flex-direction: column; }
+  .stage-card .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  .stage-card .chips .b { font-size: 11px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .stage-card .chips .src { color: var(--accent2); border-color: rgba(78,195,255,.4); }
+  .stage-card .chips .agency { color: var(--good); border-color: rgba(81,216,138,.4); }
+  .spine { background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px dashed var(--accent); border-radius: 14px; padding: 16px 18px; margin-top: 8px; }
+  .spine .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; }
+  @media (max-width: 700px) { .spine .three { grid-template-columns: 1fr; } }
+  .axis-note { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin: 6px 0 16px; }
+  .rubric-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+  @media (max-width: 700px) { .rubric-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">학습 여정 지도</span>
+    <h1>데이터는 숫자 표가 아니라, 세상의 무엇이든 될 수 있다</h1>
+    <p>두 축이 맞물려 한 학기가 됩니다 — <b>데이터 출처가 넓어지고</b>(그림→소리→삶→사회), <b>학생의 주체성이 깊어져요</b>(교사 데이터→내 삶→내가 정한 사회문제).</p>
+  </div>
+  <div class="axis-note">
+    <span>↔ 가로축 <b style="color:var(--accent2)">무엇을 데이터로 만드는가</b> (출처가 넓어짐)</span>
+    <span>↕ 세로축 <b style="color:var(--good)">누가·왜 고르는가</b> (주체성이 깊어짐)</span>
+  </div>
+
+  <div class="stage-row">
+    <div class="stage-n">1</div>
+    <a class="card stage-card hover" href="studio-color.html">
+      <h3>그림을 데이터로</h3>
+      <div class="chips"><span class="b src">출처: 그림(픽셀)</span><span class="b agency">주체성: 교사 데이터</span></div>
+      <p class="muted" style="font-size:13.3px;margin:0">명화를 픽셀로 읽으면 색·밝기·위치가 전부 숫자. 데이터를 점으로 재구성하며 <b>그림↔데이터의 순환</b>을 체험 — 미술과 데이터가 원래 한 몸임을 깨닫는 출발점.</p>
+    </a>
+  </div>
+  <div class="stage-row">
+    <div class="stage-n">2</div>
+    <a class="card stage-card hover" href="studio-sound.html">
+      <h3>소리를 데이터로</h3>
+      <div class="chips"><span class="b src">출처: 소리(시간)</span><span class="b agency">주체성: 내 삶의 소리</span></div>
+      <p class="muted" style="font-size:13.3px;margin:0">소리는 시간에 따른 진폭의 흐름. ‘아빠의 한 달 코골이’엔 가족의 피로·곁에 있다는 감각이 담겨요 — <b>데이터에 정서가 들어오는</b> 단계.</p>
+    </a>
+  </div>
+  <div class="stage-row">
+    <div class="stage-n">3</div>
+    <a class="card stage-card hover" href="studio-life.html">
+      <h3>내 삶을 데이터로</h3>
+      <div class="chips"><span class="b src">출처: 사진·대화</span><span class="b agency">주체성: 무엇을 셀지 내가</span></div>
+      <p class="muted" style="font-size:13.3px;margin:0">‘오늘 가장 즐거운 순간’ 사진, 챗봇 대화. <b>무엇을 데이터로 삼을지 내가 정하는 순간</b>부터 이미 해석 — 즐거움을 색? 시간? 함께한 사람?으로.</p>
+    </a>
+  </div>
+  <div class="stage-row">
+    <div class="stage-n">4</div>
+    <a class="card stage-card hover" href="project.html">
+      <h3>사회 문제 프로젝트</h3>
+      <div class="chips"><span class="b src">출처: 공공데이터</span><span class="b agency">주체성: 내가 정한 사회문제</span></div>
+      <p class="muted" style="font-size:13.3px;margin:0">관심 있는 사회 문제를 스스로 정해 공공데이터로 작품을. 미술이 개인 표현을 넘어 <b>사회적 발언</b>이 되는 가장 높은 단계 — “이 문제를 세상에 어떻게 보여줄 것인가”.</p>
+    </a>
+  </div>
+
+  <div class="spine">
+    <h3 style="margin:0">🦴 단계가 올라가도 변하지 않는 척추</h3>
+    <p class="muted" style="font-size:12.5px;margin:4px 0 0">데이터 출처(그림·소리·삶·사회)는 바뀌어도, 미술 교육의 본질은 같습니다.</p>
+    <div class="three">
+      <div class="card"><b>① 감각을 먼저</b><p class="muted" style="font-size:12.5px;margin:6px 0 0">데이터가 되기 전, 그 경험을 몸으로 먼저 느껴 둔다. 데이터가 경험을 식민화하지 않게.</p></div>
+      <div class="card"><b>② 매핑은 학생이 결정</b><p class="muted" style="font-size:12.5px;margin:6px 0 0">무엇을 크기·색·움직임으로 옮길지는 학생의 선택. 그 선택이 곧 창작.</p></div>
+      <div class="card"><b>③ 도구는 의도를 뒤따른다</b><p class="muted" style="font-size:12.5px;margin:6px 0 0">알고리즘·AI는 의도를 ‘대체’하지 않고 ‘뒤따른다’. 도구의 매끈함 속에 내 판단을 새겨 넣는다.</p></div>
+    </div>
+  </div>
+
+  <h2 style="margin:26px 0 10px">평가 — 4영역 <span class="info-ic" data-info="rubric">ⓘ</span></h2>
+  <p class="muted" style="font-size:13px;margin:0 0 12px">점수가 아니라 ‘무엇을 보았는지’의 언어예요. 자기·동료 평가의 기준으로 씁니다.</p>
+  <div class="rubric-grid">
+    <div class="card"><b style="color:var(--accent)">① 매핑의 의도성</b><p class="muted" style="font-size:13px;margin:6px 0 0">데이터를 시각으로 옮긴 선택에 <b>해석적 의도</b>가 담겼는가? (감각·비평의 언어)</p></div>
+    <div class="card"><b style="color:var(--accent)">② 판단의 흔적</b><p class="muted" style="font-size:13px;margin:6px 0 0">무엇을 고르고 무엇을 버렸는지, 그 <b>선택의 근거</b>가 보이는가? (비평의 언어)</p></div>
+    <div class="card"><b style="color:var(--accent)">③ 도구에 대한 주체성</b><p class="muted" style="font-size:13px;margin:6px 0 0">도구·AI가 의도를 <b>뒤따랐는가</b>, 아니면 의도를 대체했는가? (창작 주체성)</p></div>
+    <div class="card"><b style="color:var(--accent)">④ 감각으로의 귀환</b><p class="muted" style="font-size:13px;margin:6px 0 0">데이터·도구를 거친 뒤 <b>자기 감각으로 돌아와 책임</b>졌는가? (연결·성찰)</p></div>
+  </div>
+  <p class="footer-note">감각 → 질문 → 비평 → 연결 → 창작 → 메타비평 · 작품 페이지에서 4영역으로 자기·동료 평가를 남길 수 있어요</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script>UI.mountIdeaBar && UI.mountIdeaBar('idea', 'general');</script>
+</body>
+</html>

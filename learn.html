@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>알고리즘 배움터 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+<div id="app-header"></div>
+
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">배움터</span>
+    <h1>알고리즘, 쉽게 → 깊게</h1>
+    <p>각 카드는 <b>쉬운 예시</b>로 시작해 <b>원리</b>와 <b>한계</b>까지 펼쳐집니다. 친구에게 한 문장으로 설명할 수 있는지 확인해 보세요.</p>
+  </div>
+  <div id="idea"></div>
+
+  <h2 style="margin:22px 0 10px">색·형태를 읽는 알고리즘</h2>
+  <div class="grid c2" id="algo-cards"></div>
+
+  <h2 style="margin:26px 0 10px">데이터를 점으로 — 매핑 개념</h2>
+  <div class="grid c2" id="map-cards"></div>
+
+  <h2 style="margin:26px 0 10px">미술사 다리 · 윤리</h2>
+  <div class="grid c2">
+    <div class="card">
+      <h3>미술사 속의 ‘색 군집화’</h3>
+      <ul style="line-height:1.85; font-size:13.7px">
+        <li><b>쇠라의 점묘(Pointillism)</b> — 손으로 한 색의 분해·재조합. 멀리서 섞이는 ‘광학 혼합’.</li>
+        <li><b>로스코의 색면</b> — 거대한 색 덩어리로 감정을 전하는 ‘대표색’의 미학.</li>
+        <li><b>옵아트 · 모자이크</b> — 격자·반복·착시로 보는 공간 추상화.</li>
+        <li><b>제너러티브 아트(케이시 리스 등)</b> — 규칙(알고리즘)이 곧 작품이 되는 계보.</li>
+      </ul>
+      <p class="muted" style="font-size:12.5px">→ 내 작업이 이 계보 어디에 서는지 한 문장으로 적어 보세요.</p>
+    </div>
+    <div class="card" id="ethics-card"></div>
+  </div>
+  <p class="footer-note">AI가 하는 일(군집·생성·추천)과 일반 프로그래밍(편집·코딩)을 구분해 말할 수 있나요?</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  function card(key) {
+    const e = EXPLAIN[key]; if (!e) return '';
+    const badge = e.badge === 'adv' ? '<span class="badge adv">심화</span>' : '<span class="badge core">핵심</span>';
+    const ideas = (e.ideas || []).map(i => `<li>${i}</li>`).join('');
+    return `<div class="card">
+      <h3 class="with-info">${e.title} ${badge} <span class="info-ic" data-info="${key}">ⓘ</span></h3>
+      <div style="font-size:13.7px; line-height:1.7">${e.easy}</div>
+      <details style="margin-top:8px"><summary style="cursor:pointer;color:var(--accent2);font-size:13px;font-weight:700">🔵 더 깊이 — 원리</summary>
+        <div class="lvl-b" style="padding-left:0">${e.deep || ''}</div></details>
+      <details><summary style="cursor:pointer;color:var(--danger);font-size:13px;font-weight:700">🔴 이 분석이 놓친 것</summary>
+        <div class="lvl-b" style="padding-left:0">${e.limit || ''}</div></details>
+      ${ideas ? `<details><summary style="cursor:pointer;color:var(--good);font-size:13px;font-weight:700">🟢 아이디어</summary><ul class="lvl-b" style="padding-left:18px">${ideas}</ul></details>` : ''}
+    </div>`;
+  }
+  document.getElementById('algo-cards').innerHTML =
+    ['kmeans', 'histogram', 'notan', 'edge', 'mediancut', 'mosaic', 'composition'].map(card).join('');
+  document.getElementById('map-cards').innerHTML =
+    ['map-size', 'map-speed', 'map-direction', 'map-density', 'map-alpha', 'map-shape', 'data-clean'].map(card).join('');
+  document.getElementById('ethics-card').innerHTML = card('ethics-ai').replace('<div class="card">', '').replace(/<\/div>$/, '');
+  UI.mountIdeaBar('idea', 'learn');
+</script>
+</body>
+</html>

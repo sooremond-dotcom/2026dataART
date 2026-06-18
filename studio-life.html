@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>내 삶을 데이터로 · 데이터의 눈</title>
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .ltabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ltab { font: inherit; font-size: 14px; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 16px; cursor: pointer; }
+  .ltab.on { color: var(--text); border-color: var(--accent); background: rgba(var(--accent-rgb),.12); font-weight: 700; }
+  .lsec { display: none; } .lsec.on { display: block; }
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .photo-grid img { width: 74px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">내 삶을 데이터로 · 학습 3단계</span>
+    <h1>내 삶을 데이터로</h1>
+    <p>무엇을 데이터로 삼을지 <b>내가</b> 정해요 — 그 선택부터가 이미 해석입니다. ‘오늘 가장 즐거운 순간’ 사진, ‘챗봇과 나눈 대화’를 데이터로 바꿔 점 작품으로. <span class="info-ic" data-info="data-humanism">ⓘ</span></p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="ltabs">
+    <button class="ltab on" data-ltab="photo">📷 사진으로</button>
+    <button class="ltab" data-ltab="chat">💬 챗봇 대화로</button>
+  </div>
+
+  <!-- 사진 -->
+  <section class="lsec on" id="lsec-photo">
+    <div class="card">
+      <h3>1 · 사진 (여러 장)</h3>
+      <p class="muted" style="font-size:12.5px;margin:0 0 8px">‘오늘 가장 즐거운 순간’ 같은 사진을 여러 장 올려요. 각 사진에서 <b>밝기·대비·따뜻함·생생함(채도)·다양함(색 엔트로피)·북적임(에지)·주색</b>을 픽셀에서 실제로 측정해요 — 사진마다 또렷이 다른 ‘분위기 지문’이 나와요. <span class="with-info">무엇을 셀지(=무엇을 ‘즐거움’으로 볼지)가 곧 해석 <span class="info-ic" data-info="life-photo">ⓘ</span></span></p>
+      <button id="ph-upload" class="btn primary">🖼 사진 올리기(여러 장)</button>
+      <input id="ph-file" type="file" accept="image/*" multiple hidden />
+      <div class="photo-grid" id="ph-grid"></div>
+      <div id="ph-preview" style="overflow-x:auto;margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- 챗봇 -->
+  <section class="lsec" id="lsec-chat">
+    <div class="card">
+      <h3>1 · 챗봇 대화 붙여넣기</h3>
+      <p class="muted" style="font-size:12.5px;margin:0 0 8px">AI와 나눈 대화를 붙여넣어요. ‘나:/AI:’ 처럼 화자를 적으면 더 정확해요. <b>나는 AI에게 무엇을, 얼마나 길게, 몇 번이나 물었나</b>를 데이터로.</p>
+      <textarea id="chat-text" rows="6" placeholder="나: 오늘 기분이 우울해&#10;AI: 무슨 일이 있었나요?&#10;나: 시험을 못 봤어..."></textarea>
+      <button id="chat-apply" class="btn" style="margin-top:8px">분석</button>
+      <p id="chat-stats" class="muted" style="font-size:12.5px;margin-top:8px"></p>
+      <div id="chat-preview" style="overflow-x:auto;margin-top:6px"></div>
+    </div>
+  </section>
+
+  <div class="card" style="margin-top:16px">
+    <h3>2 · 데이터 선택 기록 <span class="info-ic" data-info="data-humanism">ⓘ</span></h3>
+    <label class="field">무엇을 ‘즐거움/대화’의 데이터로 삼았나요? 왜죠?</label>
+    <input id="life-intent" type="text" placeholder="예: 사진의 ‘따뜻함’을 즐거움의 신호로 봤다 / 내가 던진 질문 수를 호기심으로">
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+      <button id="life-csv" class="btn" disabled>⬇ CSV 내보내기</button>
+      <button id="life-send" class="btn accent2" disabled>→ 데이터 점 스튜디오로 보내기</button>
+    </div>
+  </div>
+  <p class="footer-note">데이터는 숫자 표가 아니라, 세상의 무엇이든 될 수 있어요 · 무엇을 셀지가 곧 해석</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/studio-life.js"></script>
+</body>
+</html>

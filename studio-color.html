@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>그림이 분해되어 다시 연주되다 · 데이터 미디어아트 스튜디오</title>
+  <meta name="description" content="명화·작품 이미지를 K-means로 분석하고, 학생이 의도와 조작 설정으로 인터랙티브 제너러티브 미디어아트로 변환하는 수업용 웹 도구." />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>try{if(localStorage.getItem('dn_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+  <!-- p5.js (로컬 동봉 = 오프라인/불안정 네트워크에서도 동작). 버전 1.9.4 -->
+  <script src="vendor/p5.min.js" defer></script>
+  <script src="js/kmeans.js" defer></script>
+  <script src="js/analysis.js" defer></script>
+  <script src="js/audio.js" defer></script>
+  <script src="js/particles.js" defer></script>
+  <script src="js/charts.js" defer></script>
+  <script src="js/app.js" defer></script>
+  <!-- 사이트 연동(코치·전시·허브로 이동). 단일 파일로 쓸 땐 없어도 그대로 동작 -->
+  <script src="js/auth.js" defer></script>
+  <script src="config/cloud-config.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/ratelimit.js" defer></script>
+  <script src="js/coach.js" defer></script>
+  <script src="js/studio-color-glue.js" defer></script>
+</head>
+<body>
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◎</span>
+      <div>
+        <h1>그림이 분해되어 다시 연주되다</h1>
+        <p>데이터 미디어아트 스튜디오 — 분석하고, 설계하고, 연주하라</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-upload" class="btn primary">🖼 이미지 업로드</button>
+      <button id="btn-analyze" class="btn">🔬 분석 실행</button>
+      <button id="btn-save-img" class="btn">⬇ 이미지 저장</button>
+      <button id="btn-help" class="btn ghost" title="도움말">？</button>
+      <button id="btn-toggle-panel" class="btn ghost only-mobile" title="설정 패널">⚙</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 캔버스(작품) -->
+    <section id="canvas-holder" class="stage">
+      <div id="busy" class="busy"><div class="spinner"></div><span>분석 중…</span></div>
+    </section>
+
+    <!-- 너비 조절 드래그 바 -->
+    <div id="splitter" title="드래그하여 작품창/설정창 너비 조절 · 더블클릭하면 기본값"></div>
+
+    <!-- 설정 패널 -->
+    <aside class="panel">
+
+      <details open>
+        <summary>1 · 이미지</summary>
+        <div class="sect">
+          <div class="row">
+            <label>명화 고르기 (실제 작품)</label>
+            <select id="sel-demo">
+              <option value="starrynight">고흐 · 별이 빛나는 밤</option>
+              <option value="seurat">쇠라 · 그랑드자트섬의 일요일 오후(점묘)</option>
+              <option value="monet">모네 · 인상, 해돋이</option>
+              <option value="hokusai">호쿠사이 · 가나가와 큰 파도(우키요에)</option>
+              <option value="monalisa">다 빈치 · 모나리자</option>
+              <option value="pearl">베르메르 · 진주 귀고리를 한 소녀</option>
+              <option value="klimt">클림트 · 키스</option>
+              <option value="scream">뭉크 · 절규</option>
+              <option value="kandinsky">칸딘스키 · 구성 7(추상)</option>
+              <option value="mondrian">몬드리안 · 빨강·파랑·노랑의 구성</option>
+            </select>
+          </div>
+          <p class="hint">실제 명화(<b>퍼블릭 도메인</b>·위키미디어 공용)를 불러와요 — 인터넷이 없으면 비슷한 절차적 그림으로 대체돼요. 직접 찍은 사진을 캔버스에 끌어다 놓아도 됩니다. (출처는 아래 ‘윤리·리포트’에 기록)</p>
+          <div id="thumb-wrap" class="thumb-wrap"><canvas id="thumb"></canvas><span>원본</span></div>
+          <input id="file-input" type="file" accept="image/*" hidden />
+        </div>
+      </details>
+
+      <details open>
+        <summary>2 · 분석 (K-means)</summary>
+        <div class="sect">
+          <div class="row">
+            <label>K (대표색 개수) <output id="out-k">8</output>
+              <button id="btn-kmeans" class="mini" style="margin-left:6px" title="K-means가 무엇인지 쉬움/중간/전문가로 펼쳐 보기">ⓘ K‑means란?</button>
+            </label>
+            <div class="row two" style="margin-top:4px">
+              <input id="rng-k" type="range" min="1" max="512" step="1" value="8" title="드래그로 K를 빠르게 바꿔요(1~512). 더 큰 값은 아래 숫자칸에 직접 입력." />
+              <input id="num-k" type="number" min="1" max="1000000" step="1" value="8" title="직접 숫자 입력 — 수천·수만 개까지 가능해요. 이미지의 실제 색 수·k-means 비용에 맞춰 실제 K가 자동 조정되고, K가 매우 크면 분석에 시간이 걸려요." />
+            </div>
+            <p class="hint" style="margin:2px 0 0">슬라이더는 512까지 · 숫자칸엔 <b>수천·수만</b> 개도 입력 가능(실제 K는 이미지 색 수·성능에 맞춰 자동 조정). K가 매우 크면 분석이 몇 초~수십 초 걸릴 수 있어요.</p>
+            <p id="k-note" class="hint"></p>
+          </div>
+          <div class="row two">
+            <div>
+              <label>색공간 <button class="mini opt-info" data-opt="space" title="설명 보기">ⓘ</button></label>
+              <select id="sel-space" title="RGB는 화면색 그대로, LAB는 사람 눈에 가까워 군집이 더 자연스러워요. 두 가지를 비교해 보세요.">
+                <option value="rgb">RGB</option>
+                <option value="lab">LAB(심화)</option>
+              </select>
+            </div>
+            <div>
+              <label>샘플링 <button class="mini opt-info" data-opt="sampling" title="설명 보기">ⓘ</button></label>
+              <select id="sel-sampling" title="어느 영역의 색을 더 모을지 — 윤곽/밝은/어두운 영역을 강조해 결과를 바꿔 보세요.">
+                <option value="uniform">무작위</option>
+                <option value="bright">밝은영역</option>
+                <option value="dark">어두운영역</option>
+                <option value="edge">윤곽(에지)</option>
+              </select>
+            </div>
+          </div>
+          <div class="palette-head">
+            <span>팔레트 · 비율 (너비 = 비율) <button class="mini opt-info" data-opt="palchart" title="차트 종류 설명">ⓘ</button></span>
+            <button id="btn-shuffle" class="mini" title="같은 설정에서 다른 시작점으로 다시 군집화">🎲 다시</button>
+          </div>
+          <div id="palette" class="palette prop" title="각 색의 너비가 그림에서 차지하는 비율이에요. 색을 클릭하면 그 군집을 켜고 끌 수 있어요."></div>
+          <div class="pal-charts">
+            <div class="pal-tabs">
+              <button class="ptab on" data-pchart="rose" title="각 색을 방사형 막대로 — 길이가 비율(색상 순 배열)">방사형</button>
+              <button class="ptab" data-pchart="donut" title="비율을 도넛 차트로">도넛</button>
+              <button class="ptab" data-pchart="hbars" title="비율을 가로 막대로">가로막대</button>
+              <button class="ptab" data-pchart="bars" title="비율을 세로 막대로">세로막대</button>
+              <button class="ptab" data-pchart="treemap" title="면적이 비율인 트리맵">트리맵</button>
+              <button class="ptab" data-pchart="wheel" title="각도=색상, 중심에서 멀수록 밝음">색상환</button>
+              <button class="ptab" data-pchart="bubble" title="가로=색상, 세로=채도, 크기=비율">거품</button>
+              <button class="ptab" data-pchart="heatmap" title="색 분포 히트맵(색상×밝기)">히트맵</button>
+            </div>
+            <canvas id="pal-canvas"></canvas>
+          </div>
+          <p id="palette-meta" class="hint"></p>
+        </div>
+      </details>
+
+      <details open>
+        <summary>3 · 점(입자)</summary>
+        <div class="sect">
+          <div class="row">
+            <label>N (점 개수) <output id="out-n">4,000</output> <button class="mini opt-info" data-opt="N" title="설명 보기">ⓘ</button></label>
+            <input id="rng-n" type="range" min="300" max="20000" step="100" value="4000" />
+          </div>
+          <p id="point-info" class="hint"></p>
+          <div class="row">
+            <label>점 크기 <output id="out-size">3</output> <button class="mini opt-info" data-opt="size" title="설명 보기">ⓘ</button></label>
+            <input id="rng-size" type="range" min="0.5" max="12" step="0.5" value="3" />
+          </div>
+          <div class="row two">
+            <div>
+              <label>점 모양 <button class="mini opt-info" data-opt="shape" title="설명 보기">ⓘ</button></label>
+              <select id="sel-shape" title="점 하나의 형태 — 원/사각/삼각/마름모/십자(별빛)/별. 크게 키워 비교해 보세요.">
+                <option value="circle">● 원</option>
+                <option value="square">■ 사각</option>
+                <option value="triangle">▲ 삼각</option>
+                <option value="diamond">◆ 마름모</option>
+                <option value="cross">✚ 십자</option>
+                <option value="star">★ 별</option>
+              </select>
+            </div>
+            <div>
+              <label>점 불투명도 <output id="out-alpha">1</output> <button class="mini opt-info" data-opt="alpha" title="설명 보기">ⓘ</button></label>
+              <input id="rng-alpha" type="range" min="0.1" max="1" step="0.05" value="1" />
+            </div>
+          </div>
+          <div class="row">
+            <label>색 모드 <button class="mini opt-info" data-opt="colormode" title="설명 보기">ⓘ</button></label>
+            <select id="sel-colormode">
+              <option value="cluster">대표색(군집)</option>
+              <option value="original">원본색</option>
+              <option value="mono">명암(흑백)</option>
+            </select>
+          </div>
+          <div class="row">
+            <label>표현 렌즈 · 모자이크 격자 <output id="out-mcell">0</output></label>
+            <input id="rng-mcell" type="range" min="0" max="40" step="2" value="0" />
+          </div>
+          <p class="hint">0=점묘 · 값이 크면 점이 격자에 모여 ‘모자이크/픽셀’ 느낌(다른 알고리즘 표현). ‘색 모드=명암’과 함께 쓰면 흑백 모자이크.</p>
+          <div class="row">
+            <label>표현 렌즈 · 구조
+              <button id="btn-lens" class="mini" style="margin-left:6px" title="에지·구도 렌즈가 무엇인지 보기">ⓘ 렌즈란?</button></label>
+            <select id="sel-lens">
+              <option value="none">없음(점묘)</option>
+              <option value="edge">에지 — 윤곽선만 살리기(선묘)</option>
+              <option value="composition">구도 — 삼분할·시선 무게중심</option>
+            </select>
+          </div>
+          <p class="hint">같은 그림도 ‘분석의 눈’을 바꾸면 다르게 보여요 — <b>에지</b>는 윤곽이 강한 점만 또렷하게 남겨 선묘처럼, <b>구도</b>는 삼분할 격자와 주황 ◎ <b>시선 무게중심</b>을 겹쳐 화면의 균형을 드러냅니다. <b>처음엔 K-means 색의 눈, 점점 다양한 분석의 눈으로.</b></p>
+        </div>
+      </details>
+
+      <details open>
+        <summary>4 · 움직임</summary>
+        <div class="sect">
+          <div class="row">
+            <label>표현 모드 <button class="mini opt-info" data-opt="mode" title="설명 보기">ⓘ</button></label>
+            <select id="sel-mode">
+              <option value="points">점</option>
+              <option value="lines">점 + 선(변위)</option>
+              <option value="3d">3D 조각</option>
+            </select>
+          </div>
+          <div class="row">
+            <label>움직임 기준
+              <button id="btn-opt-motion" class="mini opt-info" data-opt="motion" style="margin-left:6px" title="설명 보기">ⓘ</button></label>
+            <select id="sel-motion" title="원위치 유지=원본 그림의 점 위치로 돌아가 그림을 유지. 자유=원위치를 잊고 마구잡이로 떠돌아요.">
+              <option value="hold">원위치 유지(그림 유지)</option>
+              <option value="free">자유 이동(마구잡이)</option>
+            </select>
+          </div>
+          <div id="row-free" class="threeD" style="display:none">
+            <div class="row">
+              <label>자유 · 떠돎 세기 <output id="out-wander">1.2</output></label>
+              <input id="rng-wander" type="range" min="0" max="4" step="0.1" value="1.2" />
+            </div>
+            <div class="row">
+              <label>자유 · 소용돌이(±회전) <output id="out-swirl">0</output></label>
+              <input id="rng-swirl" type="range" min="-2" max="2" step="0.1" value="0" />
+            </div>
+            <div class="row">
+              <label>자유 · 중심으로 모이는 힘 <output id="out-pull">0.004</output></label>
+              <input id="rng-pull" type="range" min="0" max="0.03" step="0.001" value="0.004" />
+            </div>
+            <p class="hint">‘자유 이동’의 결을 직접 디자인 — <b>떠돎</b>은 마구 흩어짐, <b>소용돌이</b>는 중심을 휘감아 도는 흐름(부호로 방향), <b>중심 인력</b>은 화면 밖으로 안 나가게 모으는 힘.</p>
+            <div class="row">
+              <label>중력 (아래+/위−) <output id="out-gravity">0</output>
+                <button class="mini opt-info" data-opt="gravity" title="설명 보기">ⓘ</button></label>
+              <input id="rng-gravity" type="range" min="-2" max="2" step="0.1" value="0" />
+            </div>
+            <div class="row">
+              <label>좌우 흐름 (좌−/우+) <output id="out-flow">0</output></label>
+              <input id="rng-flow" type="range" min="-2" max="2" step="0.1" value="0" />
+            </div>
+            <div class="row two">
+              <div>
+                <label>값→방향 기준 <button class="mini opt-info" data-opt="valforce" title="설명 보기">ⓘ</button></label>
+                <select id="sel-valfield"><option value="bright">밝기</option><option value="edge">윤곽(에지)</option></select>
+              </div>
+              <div>
+                <label>값→방향</label>
+                <select id="sel-valdir"><option value="ud">상하(클수록 위)</option><option value="lr">좌우(클수록 우)</option><option value="out">중심 밖으로</option></select>
+              </div>
+            </div>
+            <div class="row">
+              <label>값 기반 방향 세기 <output id="out-valforce">0</output></label>
+              <input id="rng-valforce" type="range" min="0" max="3" step="0.1" value="0" />
+            </div>
+            <div class="row">
+              <label>색→방향(색 나침반) 세기 <output id="out-colorforce">0</output>
+                <button class="mini opt-info" data-opt="colorforce" title="설명 보기">ⓘ</button></label>
+              <input id="rng-colorforce" type="range" min="0" max="2.5" step="0.1" value="0" />
+            </div>
+            <p class="hint">전역 <b>장(場) 힘</b> — <b>중력·좌우 흐름</b>(전체를 한 방향으로), <b>값→방향</b>(밝기/윤곽이 클수록 위·우·밖으로), <b>색 나침반</b>(점이 자기 색상이 가리키는 쪽으로). 자유 이동과 합쳐 ‘데이터가 스스로 흐르는’ 움직임을 만들어요.</p>
+          </div>
+          <div class="row">
+            <label>복귀력(집중) <output id="out-return">0.08</output> <button class="mini opt-info" data-opt="return" title="설명 보기">ⓘ</button></label>
+            <input id="rng-return" type="range" min="0.005" max="0.3" step="0.005" value="0.08" />
+          </div>
+          <div class="row">
+            <label>진동 <output id="out-vibration">0</output> <button class="mini opt-info" data-opt="vibration" title="설명 보기">ⓘ</button></label>
+            <input id="rng-vibration" type="range" min="0" max="5" step="0.1" value="0" />
+          </div>
+          <div class="row">
+            <label>잔상(트레일) <output id="out-trail">255</output> <button class="mini opt-info" data-opt="trail" title="설명 보기">ⓘ</button></label>
+            <input id="rng-trail" type="range" min="10" max="255" step="5" value="255" />
+          </div>
+          <label class="chk"><input id="chk-additive" type="checkbox" /> 발광(빛 번짐) 효과 <button class="mini opt-info" data-opt="additive" title="설명 보기">ⓘ</button></label>
+          <div class="row">
+            <label>배경 <button class="mini opt-info" data-opt="bg" title="설명 보기">ⓘ</button></label>
+            <select id="sel-bg" title="작품이 놓이는 '공기' — 어두운 배경일수록 발광이 강렬, 밝은 배경은 드로잉·전시 느낌.">
+              <option value="night">갤러리 남색(기본)</option>
+              <option value="black">순흑</option>
+              <option value="ink">잉크 보라</option>
+              <option value="slate">슬레이트 회청</option>
+              <option value="paper">따뜻한 종이</option>
+              <option value="white">전시 흰색</option>
+            </select>
+          </div>
+          <p class="hint">배경은 작품의 ‘공기’예요 — <b>발광</b> 효과는 어두운 배경(남색·순흑)에서 가장 강렬하고, <b>종이·흰색</b>은 밝은 전시·드로잉 느낌이에요.</p>
+          <div id="row-3d" class="threeD" style="display:none">
+            <div class="row">
+              <label>3D 회전축</label>
+              <select id="sel-rotaxis" title="자동 회전이 어느 축을 도는지 — 좌우(Y)·상하(X)·대각(둘 다).">
+                <option value="y">좌우(Y축)</option>
+                <option value="x">상하(X축)</option>
+                <option value="xy">대각(둘 다)</option>
+              </select>
+            </div>
+            <div class="row">
+              <label>3D 회전 속도 <output id="out-rotate">0.004</output></label>
+              <input id="rng-rotate" type="range" min="0" max="0.03" step="0.001" value="0.004" />
+            </div>
+            <div class="row">
+              <label>3D 깊이(밝기→입체) <output id="out-depth">220</output></label>
+              <input id="rng-depth" type="range" min="0" max="500" step="10" value="220" />
+            </div>
+            <p class="hint">3D 모드에서는 캔버스를 <b>드래그</b>해 직접 돌릴 수 있어요 — 좌우 드래그=Y축, 상하 드래그=X축.</p>
+          </div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>5 · 인터랙션</summary>
+        <div class="sect">
+          <p class="grp">🖱 마우스</p>
+          <div class="row">
+            <label>마우스 반응</label>
+            <select id="sel-mouse">
+              <option value="repel">밀어내기</option>
+              <option value="attract">끌어당기기</option>
+              <option value="swell">부풀리기(크기↑)</option>
+              <option value="scatter">흩뿌리기</option>
+              <option value="none">없음</option>
+            </select>
+          </div>
+          <div class="row two">
+            <div>
+              <label>반경 <output id="out-mradius">130</output></label>
+              <input id="rng-mradius" type="range" min="30" max="320" step="10" value="130" />
+            </div>
+            <div>
+              <label>세기 <output id="out-mstrength">1</output></label>
+              <input id="rng-mstrength" type="range" min="0.2" max="3" step="0.1" value="1" />
+            </div>
+          </div>
+          <label class="chk"><input id="chk-explode" type="checkbox" checked /> 클릭 시 폭발</label>
+
+          <p class="grp">🎤 마이크(소리)</p>
+          <button id="btn-mic" class="btn wide">마이크 켜기</button>
+          <div class="row">
+            <label>감도 <output id="out-msens">1.2</output></label>
+            <input id="rng-msens" type="range" min="0.3" max="3" step="0.1" value="1.2" />
+          </div>
+          <div class="row">
+            <label>볼륨이 바꾸는 것</label>
+            <select id="sel-mtarget">
+              <option value="vibration">진동</option>
+              <option value="spread">확산</option>
+              <option value="size">크기</option>
+            </select>
+          </div>
+          <label class="chk"><input id="chk-freq" type="checkbox" checked /> 주파수(저·중·고음) → 밝기별 색 군집 반응</label>
+          <div id="mic-meters" class="meters">
+            <div class="meter"><span>음량</span><div class="bar"><i id="m-vol"></i></div></div>
+            <div class="meter"><span>저음</span><div class="bar"><i id="m-low"></i></div></div>
+            <div class="meter"><span>중음</span><div class="bar"><i id="m-mid"></i></div></div>
+            <div class="meter"><span>고음</span><div class="bar"><i id="m-high"></i></div></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>6 · 프리셋</summary>
+        <div class="sect presets">
+          <button class="btn wide" data-preset="pointillism">🟤 점묘화(고요)</button>
+          <button class="btn wide" data-preset="living">🌬 살아있는 캔버스</button>
+          <button class="btn wide" data-preset="sound">🎵 소리로 연주</button>
+          <button class="btn wide" data-preset="nebula">🌌 성운·해체</button>
+          <button class="btn wide" data-preset="sculpture">🗿 3D 조각</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>7 · 내보내기</summary>
+        <div class="sect">
+          <button id="btn-record" class="btn wide">● 영상 녹화</button>
+          <div class="row two">
+            <button id="btn-copy-palette" class="btn">팔레트 복사</button>
+            <button id="btn-report" class="btn">리포트(.md)</button>
+          </div>
+          <div class="row two">
+            <button id="btn-save-settings" class="btn">설정 저장</button>
+            <button id="btn-load-settings" class="btn">설정 불러오기</button>
+          </div>
+          <input id="settings-input" type="file" accept="application/json,.json" hidden />
+        </div>
+      </details>
+
+      <details>
+        <summary>8 · 윤리 · 리포트 정보</summary>
+        <div class="sect">
+          <div class="row"><label>작품명</label><input id="in-title" type="text" placeholder="예: 별이 빛나는 밤" /></div>
+          <div class="row"><label>작가</label><input id="in-artist" type="text" placeholder="예: 빈센트 반 고흐" /></div>
+          <div class="row"><label>출처·라이선스</label><input id="in-source" type="text" placeholder="예: 퍼블릭 도메인 / 출처 URL" /></div>
+          <div class="row"><label>제작자(학생)</label><input id="in-student" type="text" placeholder="이름/학번" /></div>
+          <div class="row"><label>관람 경험 목표(의도, 한 문장)</label><input id="in-intent" type="text" placeholder="예: 소리로 그림을 '연주'하는 경험" /></div>
+          <p class="hint warn">⚠ 마이크 음성은 저장되지 않고 실시간 분석값만 사용합니다. 색 분석·요약은 K-means(알고리즘)이며, 의도와 규칙 설계는 학생의 몫입니다.</p>
+        </div>
+      </details>
+
+    </aside>
+  </main>
+
+  <!-- 토스트 알림 -->
+  <div id="toast" class="toast"></div>
+
+  <!-- 도움말 모달 -->
+  <div id="modal-help" class="modal">
+    <div class="modal-box">
+      <button id="btn-help-close" class="modal-close">✕</button>
+      <h2>사용법 — 분석하고, 설계하고, 연주하기</h2>
+      <ol>
+        <li><b>이미지 넣기</b> · 상단 ‘이미지 업로드’ 또는 데모 선택(파일을 끌어다 놓아도 됨).</li>
+        <li><b>분석(K-means)</b> · K(대표색 개수)·색공간·샘플링을 바꾸면 그림의 색 구조가 어떻게 요약되는지 비교해 보세요. 팔레트의 색을 클릭하면 그 색 군집을 켜고 끌 수 있어요.</li>
+        <li><b>점 설계</b> · N(점 개수)과 크기, 색 모드(대표색/원본색)로 ‘해상도’와 ‘표현 전략’을 정합니다.</li>
+        <li><b>움직임</b> · 복귀력·진동·잔상·발광, 그리고 <b>3D 조각</b>(밝기→깊이) 모드.</li>
+        <li><b>인터랙션</b> · 마우스(밀기/끌기/부풀리기/흩뿌리기·클릭 폭발)와 마이크(볼륨→진동·확산·크기, 주파수→밝기별 색 군집 반응).</li>
+        <li><b>내보내기</b> · 이미지/영상 저장, 팔레트 복사, <b>분석 리포트·설계서(.md)</b>와 설정(JSON) 저장으로 수업 제출물을 만듭니다.</li>
+      </ol>
+      <p class="hint">탐구 질문: K를 바꾸면 색 구조는? 어떤 K가 분위기를 가장 잘 살리나? N이 정보·감정에 주는 영향은? 소리·마우스는 관람 경험을 어떻게 바꾸나?</p>
+      <p class="hint">※ K-means의 색 요약은 ‘정답’이 아니라 손실이 있는 근사·해석입니다.</p>
+    </div>
+  </div>
+
+  <!-- K-means 설명 모달: 쉬움 / 중간 / 전문가 -->
+  <div id="modal-kmeans" class="modal">
+    <div class="modal-box">
+      <button id="km-close" class="modal-close">✕</button>
+      <h2>K‑means — 그림이 점으로 ‘치환’되는 원리</h2>
+      <div class="km-tabs">
+        <button class="km-tab on" data-kmtab="easy">🟡 쉬움</button>
+        <button class="km-tab" data-kmtab="mid">🔵 중간</button>
+        <button class="km-tab" data-kmtab="expert">🟣 전문가</button>
+      </div>
+
+      <div class="km-level show" data-kmlevel="easy">
+        <p>그림 속 <b>수많은 색</b>을 비슷한 것끼리 <b>K개의 무리</b>로 묶고, 각 무리의 <b>가운데 색(대표색)</b> 하나로 대신해요.</p>
+        <p class="km-ex">🖍 크레파스 100자루를 “빨강 계열·파랑 계열…” K개 상자에 나누고, 각 상자의 ‘가운데 색’ 하나만 골라 그 상자 전체를 대신하는 것과 같아요.</p>
+        <p>그래서 복잡한 그림이 <b>몇 개의 대표색 점</b>으로 단순해집니다. <b>K가 작으면</b> 더 단순(추상), <b>K가 크면</b> 더 자세해져요. 각 색의 <b>비율</b>은 그 색에 모인 점의 양이에요.</p>
+      </div>
+
+      <div class="km-level" data-kmlevel="mid">
+        <p>“군집(무리) · 중심(대표색) · 거리(색의 가까움)”를 <b>반복</b>합니다.</p>
+        <ol class="km-ol">
+          <li><b>시작</b> — 대표색 후보 K개를 서로 멀리 흩어 고릅니다(k‑means++).</li>
+          <li><b>배정</b> — 모든 색을 <b>가장 가까운</b> 대표색에 배정합니다.</li>
+          <li><b>갱신</b> — 각 무리에 모인 색들의 <b>평균</b>으로 대표색을 옮깁니다.</li>
+          <li><b>반복</b> — 더 이상 변하지 않을 때까지 ②③ 반복(수렴).</li>
+        </ol>
+        <p>각 픽셀(표본)은 자기와 가장 가까운 대표색으로 <b>치환</b>되어 ‘점’이 됩니다. 그 점들을 다시 찍어 작품을 만들어요.</p>
+      </div>
+
+      <div class="km-level" data-kmlevel="expert">
+        <p>색 사이 ‘거리’는 보통 <b>유클리드 거리</b>. 색공간 선택이 결과를 바꿉니다 — <code>RGB</code>는 화면 신호, <code>LAB</code>는 사람 지각에 가까워(균일) 군집이 더 자연스럽습니다.</p>
+        <ul class="km-ul">
+          <li><b>k‑means++</b> 초기화로 중심을 분산 → 나쁜 지역최소(local minimum) 위험을 줄입니다.</li>
+          <li>반복은 <b>군집 내 분산(WCSS)</b>을 단조 감소시키며 수렴합니다.</li>
+          <li><b>K↑</b> 면 WCSS↓(더 자세)이지만 잡음·과분할 위험. 적정 K는 ‘엘보우’ 등으로 가늠.</li>
+          <li><b>시드 고정</b> → 같은 입력에 같은 결과(재현 가능). 이 스튜디오는 시드를 고정/변경할 수 있어요.</li>
+          <li>K는 표본 색 수·성능을 넘을 수 없습니다(그래서 큰 입력은 자동 조정).</li>
+        </ul>
+      </div>
+
+      <p class="hint warn">이 분석이 놓친 것: 색이 화면 <b>‘어디에’ 있는지(위치)</b>·형태·붓질은 보지 못해요. 결과는 손실 있는 근사·해석입니다.</p>
+    </div>
+  </div>
+
+  <!-- 표현 렌즈 설명: 에지 · 구도 -->
+  <div id="modal-lens" class="modal">
+    <div class="modal-box">
+      <button id="lens-close" class="modal-close">✕</button>
+      <h2>표현 렌즈 — 같은 그림, 다른 ‘분석의 눈’</h2>
+      <p>K-means는 <b>색</b>의 눈이에요. 같은 그림도 다른 알고리즘으로 보면 다른 것이 보입니다. “처음엔 K-means 하나로, 점점 다양한 렌즈로.”</p>
+
+      <h3 style="margin:16px 0 4px">🪡 에지(윤곽) — Sobel</h3>
+      <p>색이 <b>급격히 바뀌는 경계</b>(윤곽선)를 찾아요. 평평한 면의 점은 옅어져 사라지고 <b>윤곽의 점만 또렷이</b> 남아 ‘선묘(드로잉)’처럼 보입니다.</p>
+      <p class="hint warn">놓친 것: 에지는 <b>색의 의미를 몰라요.</b> 진짜 물체 윤곽과 강한 그림자 경계를 구분하지 못하고, 부드러운 그라데이션은 잘 못 잡습니다.</p>
+
+      <h3 style="margin:16px 0 4px">🎯 구도 — 삼분할 · 시선 무게중심</h3>
+      <p><b>삼분할 격자</b>와, 윤곽·밝기로 가중한 <b>시선 무게중심(주황 ◎)</b>을 겹쳐 화면의 <b>균형</b>을 드러내요. 무게중심이 삼분할 교차점(파워포인트)에 가까울수록 ‘안정된 구도’로 읽힙니다.</p>
+      <p class="hint warn">놓친 것: ‘느낌’을 무게로 <b>거칠게 근사</b>할 뿐 — 작지만 강렬한 빨강처럼 의미상 중요한 작은 요소는 약하게 잡혀요. 삼분할은 하나의 관습일 뿐, 모든 명작이 따르지는 않습니다.</p>
+    </div>
+  </div>
+
+  <!-- 각 옵션 ⓘ 공용 설명 모달 -->
+  <div id="modal-opt" class="modal">
+    <div class="modal-box">
+      <button id="opt-close" class="modal-close">✕</button>
+      <h2 id="opt-title"></h2>
+      <div id="opt-body" class="km-level show"></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>데이터의 눈으로 그림 읽기 · 로그인</title>
+<meta name="description" content="분석에서 창작까지 — 데이터로 그림을 읽고, 인터랙티브 미디어아트로 재창조하는 수업 사이트." />
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .hero { text-align: center; margin: 30px 0 0; }
+  .hero h1 { font-size: clamp(24px, 4.6vw, 38px); line-height: 1.22; margin: 10px 0 14px; letter-spacing: -.4px; }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .lead { color: var(--muted); font-size: 15px; max-width: 600px; margin: 0 auto; line-height: 1.7; }
+  .hero .lead b { color: var(--text); font-weight: 600; }
+  /* 슬림 여정 — 한 줄, 단일 강조색(인디고)으로 조용하게 */
+  .arc { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 24px auto 0; }
+  .arc .s { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 7px; box-shadow: var(--shadow); }
+  .arc .s i { width: 21px; height: 21px; border-radius: 50%; background: rgba(var(--accent-rgb),.16); color: var(--accent);
+    font-weight: 800; font-size: 11px; display: grid; place-items: center; }
+  .arc .a { color: var(--muted2); font-weight: 700; }
+  @media (max-width: 600px) { .arc .a { display: none; } }
+  /* 로그인 — 가운데, 좁게 */
+  .login-wrap { max-width: 460px; margin: 28px auto 0; }
+  .login-wrap .card { padding: 22px; }
+  .can-do { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin: 22px auto 0; max-width: 620px; }
+  .can-do span { font-size: 12px; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; }
+  /* 닫는 철학 한 문장 */
+  .epigraph { text-align: center; color: var(--muted); font-size: 15px; font-style: italic; line-height: 1.6; max-width: 520px; margin: 22px auto 4px; }
+  .epigraph b { color: var(--accent); font-style: normal; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+
+<div class="wrap narrow">
+  <div class="hero">
+    <span class="eyebrow">서울미술고등학교 · AI 융합 미술수업</span>
+    <h1>데이터의 눈으로 그림을 읽고,<br><span class="accent">의미를 담아</span> 다시 그리다</h1>
+    <p class="lead">그림·소리·내 삶·사회를 <b>데이터로 분석</b>하고, 나의 <b>의도</b>로 <b>인터랙티브 미디어아트</b>로 재창조해요. 알고리즘은 도구일 뿐, <b>무엇을 셀지·무엇을 강조할지</b>가 곧 작가의 선택입니다.</p>
+    <div class="arc" aria-label="4단계 여정: 그림 → 소리 → 내 삶 → 사회">
+      <span class="s"><i>1</i>그림</span><span class="a">→</span>
+      <span class="s"><i>2</i>소리</span><span class="a">→</span>
+      <span class="s"><i>3</i>내 삶</span><span class="a">→</span>
+      <span class="s"><i>4</i>사회</span>
+    </div>
+  </div>
+
+  <p class="epigraph">숫자가 끝나는 곳에서, <b>예술</b>이 시작된다.</p>
+
+  <div class="login-wrap">
+    <div class="card">
+      <h3 style="margin:0 0 3px">시작하기</h3>
+      <p class="muted" style="font-size:12.5px; margin:0 0 12px">처음이면 이름·반/번호·PIN을 정하면 계정이 만들어져요.</p>
+      <div class="grid c2">
+        <div><label class="field" style="margin-top:0">이름</label><input id="f-name" type="text" placeholder="실명 또는 별명" autocomplete="off" /></div>
+        <div><label class="field" style="margin-top:0">반-번호 (선택)</label><input id="f-klass" type="text" placeholder="예: 2-7" autocomplete="off" /></div>
+      </div>
+      <div class="grid c2">
+        <div><label class="field">PIN (숫자 4자리)</label><input id="f-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off" /></div>
+        <div><label class="field">표시 이름 (선택)</label><input id="f-display" type="text" placeholder="비우면 이름 사용" autocomplete="off" /></div>
+      </div>
+      <label class="field">역할</label>
+      <select id="f-role"><option value="student">학생</option><option value="teacher">교사</option></select>
+      <button id="btn-login" class="btn primary wide" style="margin-top:16px">시작하기 →</button>
+      <p class="muted" style="font-size:12px; margin-top:10px; text-align:center">로그인 없이 <a href="hub.html">둘러보기</a>도 가능해요 (저장·전시는 로그인 필요).</p>
+    </div>
+  </div>
+
+  <div class="can-do" aria-label="이 수업에서 하는 것">
+    <span>🎨 색 군집</span><span>🔬 7가지 분석 렌즈</span><span>🤖 객체 감지</span><span>🎤 소리·🧑 사진</span><span>🖼 전시·🔍 비평</span><span>🧭 AI 감상 코치</span>
+  </div>
+
+  <div id="privacy-note" style="max-width:620px; margin:18px auto 0"></div>
+  <p class="footer-note">© 2026 <b>MIRAN HWANG</b> · MIRAN726@GMAIL.COM · 데이터 미디어아트 스튜디오 · 교육용</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  document.getElementById('privacy-note').innerHTML = UI.callout(
+    '<b>개인정보 안내</b> · PIN 4자리는 ‘실수 방지 잠금’ 수준이에요(진짜 보안 아님). 미성년자 정보이니 <b>학교 개인정보 방침</b>을 먼저 확인하고, 필요하면 표시 이름을 별명/코드로 바꾸세요.', 'warn');
+
+  const qs = new URLSearchParams(location.search);
+  const next = qs.get('next') || 'hub.html';
+  function doLogin() {
+    try {
+      Auth.login({
+        name: document.getElementById('f-name').value,
+        klass: document.getElementById('f-klass').value,
+        pin: document.getElementById('f-pin').value,
+        display: document.getElementById('f-display').value,
+        role: document.getElementById('f-role').value
+      });
+      location.href = next;
+    } catch (e) { UI.toast(e.message); }
+  }
+  document.getElementById('btn-login').addEventListener('click', doLogin);
+  document.getElementById('f-pin').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  if (Auth.current()) UI.toast('이미 로그인되어 있어요. 상단 메뉴로 이동하세요.');
+</script>
+</body>
+</html>

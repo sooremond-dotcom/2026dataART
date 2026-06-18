@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>처음이세요? · 사용 안내 · 데이터의 눈</title>
+<meta name="description" content="수학·코딩을 몰라도 괜찮아요. 5분 만에 첫 작품을 만드는 친절한 사용 안내 — 낱말 사전과 막힐 때 도움말까지." />
+<link rel="stylesheet" href="css/site.css" />
+<style>
+  .hero-start { background: linear-gradient(135deg, rgba(110,120,255,.14), rgba(80,200,200,.10)); border: 1px solid var(--line); border-radius: 18px; padding: 26px 24px; }
+  .reassure { display: inline-block; background: rgba(80,200,140,.16); color: var(--good, #51d88a); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; }
+  .steps { counter-reset: step; display: grid; gap: 12px; }
+  .step { position: relative; padding: 14px 16px 14px 56px; background: var(--panel, #11131d); border: 1px solid var(--line); border-radius: 14px; }
+  .step::before { counter-increment: step; content: counter(step); position: absolute; left: 14px; top: 14px; width: 30px; height: 30px; border-radius: 50%; background: var(--accent, #6e78ff); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .step h4 { margin: 0 0 3px; font-size: 15px; }
+  .step p { margin: 0; font-size: 13px; color: var(--muted, #9aa3bd); }
+  .journey { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .jcard { display: block; text-decoration: none; color: inherit; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel, #11131d); transition: transform .12s, border-color .12s; }
+  .jcard:hover { transform: translateY(-2px); border-color: var(--accent, #6e78ff); }
+  .jcard .num { font-size: 11px; font-weight: 800; color: var(--accent2, #ffb454); letter-spacing: .04em; }
+  .jcard h4 { margin: 3px 0 4px; font-size: 14.5px; }
+  .jcard p { margin: 0; font-size: 12px; color: var(--muted, #9aa3bd); line-height: 1.5; }
+  .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .term { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel, #11131d); }
+  .term b { color: var(--accent2, #ffb454); }
+  .term span { display: block; font-size: 12.5px; color: var(--muted, #9aa3bd); margin-top: 3px; line-height: 1.55; }
+  .faq summary { cursor: pointer; font-weight: 700; padding: 10px 0; font-size: 14px; border-top: 1px solid var(--line); }
+  .faq p { margin: 0 0 12px; font-size: 13px; color: var(--muted, #9aa3bd); line-height: 1.6; }
+  .big-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--accent, #6e78ff); color: #fff; text-decoration: none; font-weight: 800; padding: 12px 22px; border-radius: 12px; font-size: 15px; }
+  .big-cta:hover { filter: brightness(1.08); }
+</style>
+</head>
+<body>
+<div id="app-header"></div>
+
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">처음이세요?</span>
+    <h1>5분이면 첫 작품을 만들어요</h1>
+    <p>이 사이트는 <b>그림·소리·데이터를 ‘움직이는 점 작품’으로 바꾸는</b> 미술 도구예요. 어려운 건 컴퓨터가 다 하니까, 여러분은 <b>고르고·바꾸고·느끼기</b>만 하면 됩니다.</p>
+  </div>
+  <div id="idea"></div>
+
+  <div class="hero-start">
+    <span class="reassure">✓ 수학·코딩을 몰라도 괜찮아요</span>
+    <p style="margin:12px 0 16px; font-size:14.5px; line-height:1.7">슬라이더를 <b>그냥 만져 보세요.</b> 무엇이 어떻게 변하는지 눈으로 보는 것 자체가 공부예요. 정답은 없어요 — <b>무엇을 강조할지 고르는 것이 곧 ‘작가의 선택’</b>입니다. 모르는 단어가 보이면 화면의 <b>ⓘ</b> 아이콘을 누르면 쉬운 말로 설명해 줘요.</p>
+    <a class="big-cta" href="studio-color.html">🎨 바로 시작하기 — 색 군집 스튜디오 열기</a>
+  </div>
+
+  <h2 style="margin:26px 0 10px">① 5분 빠른 시작 — 이대로만 따라 해요</h2>
+  <div class="steps">
+    <div class="step"><h4>‘색 군집 스튜디오’를 열어요</h4><p>위 파란 버튼을 누르거나, 상단 메뉴 <b>만들기 → 색 군집 스튜디오</b>를 골라요. 별이 빛나는 밤 그림이 점으로 살아 움직일 거예요.</p></div>
+    <div class="step"><h4>명화를 하나 골라요</h4><p>왼쪽 설정의 <b>‘명화 고르기’</b>에서 고흐·모네·뭉크 같은 실제 작품을 골라요. 직접 찍은 사진을 화면에 <b>끌어다 놓아도</b> 돼요.</p></div>
+    <div class="step"><h4>슬라이더를 만져 보며 변화를 느껴요</h4><p><b>K(대표색 개수)</b>를 5 → 30으로 키워 보세요. 색이 얼마나 자세해지는지 보여요. <b>점 개수·크기·점 모양·배경</b>도 바꿔 보고, 마음에 드는 ‘분위기’를 찾아요.</p></div>
+    <div class="step"><h4>마우스로 ‘연주’하고, 저장해요</h4><p>작품 위에서 마우스를 움직이면 점들이 반응해요(밀기·끌기). 상단 <b>‘이미지 저장’</b>으로 내 작품을 내려받아요. 더 다듬고 싶으면 <b>프리셋</b>을 눌러 분위기를 한 번에 잡고 손봐요.</p></div>
+  </div>
+  <p class="muted" style="font-size:12.5px;margin-top:8px">💡 처음엔 <b>‘프리셋’</b>(6번 항목)을 눌러 완성된 분위기부터 구경하는 것도 좋아요 — 점묘화·살아있는 캔버스·성운·3D 조각.</p>
+
+  <h2 style="margin:26px 0 10px">② 전체 여정 — 순서대로 깊어져요</h2>
+  <p class="muted" style="font-size:13px;margin:0 0 10px">꼭 순서대로 안 해도 돼요. 끌리는 곳부터 눌러 보세요.</p>
+  <div class="journey">
+    <a class="jcard" href="studio-color.html"><span class="num">1단계 · 색</span><h4>🎨 색 군집 스튜디오</h4><p>명화를 대표색 ‘점’으로 분해해 다시 연주해요. 여기서 시작!</p></a>
+    <a class="jcard" href="studio-data.html"><span class="num">1단계 · 데이터</span><h4>📊 데이터 점 스튜디오</h4><p>숫자(기온·감정·걸음 수)를 춤추는 점으로 바꿔요.</p></a>
+    <a class="jcard" href="studio-sound.html"><span class="num">2단계 · 소리</span><h4>🎤 소리를 데이터로</h4><p>녹음·소리에서 특징을 뽑아 ‘춤추는 점’ 작품으로. (아빠 코골이 샘플!)</p></a>
+    <a class="jcard" href="studio-life.html"><span class="num">3단계 · 삶</span><h4>🌱 내 삶을 데이터로</h4><p>내 사진·대화를 데이터로. 정서가 데이터를 만나는 단계.</p></a>
+    <a class="jcard" href="studio-object.html"><span class="num">AI 렌즈</span><h4>👁 객체 감지 · AI의 눈</h4><p>사진 속 사물을 AI가 찾아내요. AI가 무엇을 보고 무엇을 놓치는지.</p></a>
+    <a class="jcard" href="project.html"><span class="num">4단계 · 발언</span><h4>📣 사회문제 프로젝트</h4><p>공공데이터로 사회적 메시지를 담은 작품을 만들어요.</p></a>
+  </div>
+
+  <h2 style="margin:26px 0 10px">③ 꼭 아는 낱말 사전 — 어려운 말, 쉽게</h2>
+  <div class="glossary">
+    <div class="term"><b>데이터</b><span>숫자로 적어 둔 사실이에요. 오늘 기온 23도, 걸음 수 8천 보처럼. 이 사이트는 <b>색·소리·사진</b>도 데이터(숫자)로 바꿔요.</span></div>
+    <div class="term"><b>알고리즘</b><span>‘이렇게 해라’ 하는 <b>차례 정해진 방법</b>이에요. 라면 끓이는 순서처럼. 컴퓨터가 그 순서대로 그림을 분석해요.</span></div>
+    <div class="term"><b>K-means (대표색 묶기)</b><span>그림 속 수많은 색을 비슷한 것끼리 <b>K개의 무리</b>로 묶고, 무리마다 ‘가운데 색’ 하나로 대신해요. K=5면 5색으로 요약.</span></div>
+    <div class="term"><b>군집 (무리)</b><span>비슷한 것끼리 모은 <b>한 덩어리</b>예요. 색을 모으면 ‘색 군집’, 점을 모으면 ‘점 무리’.</span></div>
+    <div class="term"><b>점 · 입자</b><span>화면에서 움직이는 작은 동그라미 하나하나예요. 그림이 <b>점으로 ‘치환’</b>되어 살아 움직이는 게 이 작품의 핵심.</span></div>
+    <div class="term"><b>Hz (헤르츠)</b><span>1초에 떨리는 <b>횟수</b>예요. 적게 떨리면 낮은 소리(둥둥), 많이 떨리면 높은 소리(삐-). 소리의 ‘높낮이’ 단위.</span></div>
+    <div class="term"><b>매핑 (연결하기)</b><span>데이터를 그림의 무언가에 <b>이어 주는 것</b>. 예: ‘소리가 크면 → 점을 크게’, ‘기온이 높으면 → 빨갛게’.</span></div>
+    <div class="term"><b>정규화</b><span>크기가 제각각인 숫자를 <b>0~1 사이로 맞춰</b> 공평하게 비교하는 것. 키(cm)와 몸무게(kg)를 같은 잣대로 보는 셈.</span></div>
+    <div class="term"><b>프리셋</b><span>좋은 설정을 미리 묶어 둔 <b>‘추천 세트’</b>예요. 누르면 분위기가 한 번에 잡혀요. 그다음 내 취향대로 손보면 돼요.</span></div>
+    <div class="term"><b>샘플링</b><span>그림의 모든 점 대신 일부만 ‘골라’ 쓰는 것. 어디서 더 고를지(밝은 곳·윤곽)가 <b>표현 선택</b>이 돼요.</span></div>
+  </div>
+
+  <h2 style="margin:26px 0 10px">④ 변환 원리 — 무엇이 무엇으로 바뀌나</h2>
+  <p class="muted" style="font-size:13px;margin:0 0 10px">‘데이터 → 그림’은 <b>두 번의 번역</b>이에요: ① 실제 세계를 <b>숫자</b>로(특징 추출), ② 그 숫자를 점의 <b>크기·색·위치·움직임</b>으로(매핑). 무엇을 어디에 잇느냐가 곧 작가의 선택이에요.</p>
+
+  <h3 style="margin:14px 0 6px;font-size:15px">🎤 소리는 ‘어떤 값’으로 바뀌나</h3>
+  <p class="muted" style="font-size:12.5px;margin:0 0 8px">약 0.15초마다 아래 값을 뽑아 <b>시계열(시간에 따른 숫자 흐름)</b>로 만들고, 그걸 ‘춤추는 점’으로 그려요. (음성 원본은 저장 안 함 — 숫자만)</p>
+  <div class="glossary">
+    <div class="term"><b>음량</b><span>소리의 세기(RMS). 클수록 큰 소리 → 보통 점 <b>크기·밝기</b>에 연결.</span></div>
+    <div class="term"><b>저음·중음·고음</b><span>낮은/가운데/높은 <b>주파수</b> 대역의 에너지. 음색을 가르는 3등분.</span></div>
+    <div class="term"><b>날카로움</b><span>에너지가 높은 주파수에 쏠린 정도(스펙트럼 무게중심). 높을수록 쉭·치 하는 밝은 소리.</span></div>
+    <div class="term"><b>변화</b><span>직전 순간 대비 요동(리듬·들썩임) → 점의 <b>떨림·진동</b>에 잘 어울려요.</span></div>
+    <div class="term"><b>음높이(Hz)</b><span>가장 강한 <b>주파수</b> = 소리의 높낮이. 낮으면 저음, 높으면 고음 → <b>색·높이</b>에 연결.</span></div>
+  </div>
+
+  <h3 style="margin:16px 0 6px;font-size:15px">🎨 K값은 어떻게 정하나 (색 군집·K-means)</h3>
+  <div class="hero-start" style="padding:14px 16px">
+    <p style="margin:0;font-size:13.5px;line-height:1.75"><b>K = 색을 몇 개로 요약할까.</b> 정답은 없어요 — <b>작게(5~8)</b> 하면 단순·추상적, <b>크게(20~50)</b> 하면 원본에 가깝게 자세해져요. 슬라이더는 512까지, 숫자칸엔 수천·수만도 가능하지만 <b>이미지의 실제 색 수·성능</b>에 맞춰 실제 K가 자동 조정돼요(없는 색은 못 만들어요). 그래서 <b>‘얼마가 정답?’이 아니라, K를 바꿔 분위기를 비교</b>하는 것이 핵심이에요. ‘ⓘ K-means란?’을 누르면 쉬움→전문가로 더 펼쳐 볼 수 있어요.</p>
+  </div>
+
+  <h3 style="margin:16px 0 6px;font-size:15px">🔗 매핑 — ‘어떤 값’을 ‘어디에’</h3>
+  <div class="glossary">
+    <div class="term"><b>큰 값 → 큰 점</b><span>수치가 클수록 점을 크게(크기 매핑).</span></div>
+    <div class="term"><b>높은 값 → 위로</b><span>수치가 클수록 점을 위쪽에(높이 매핑).</span></div>
+    <div class="term"><b>빠른 변화 → 빠른 진동</b><span>값이 많이 변할수록 더 떨리게(속도·진동 매핑).</span></div>
+    <div class="term"><b>종류(범주) → 색</b><span>같은 종류끼리 같은 색(범주 색). 예: 코골이 상황·감지된 사물 종류.</span></div>
+    <div class="term"><b>신뢰도 낮음 → 떨림</b><span>객체 감지에서 AI가 덜 확신할수록 점이 더 흔들려요.</span></div>
+    <div class="term"><b>비율 → 면적·너비</b><span>색이 많이 쓰일수록 차트에서 넓게(팔레트 비율).</span></div>
+  </div>
+  <p class="muted" style="font-size:12px;margin:8px 0 0">같은 데이터도 <b>무엇을 어디에 매핑하느냐</b>에 따라 전혀 다른 작품이 돼요 — 그 선택이 곧 <b>해석</b>입니다. (소리·객체 페이지의 ‘춤추는 점’에서 직접 바꿔 보세요.)</p>
+
+  <h2 style="margin:26px 0 10px">⑤ 막힐 때 — 자주 묻는 것</h2>
+  <div class="faq">
+    <details open><summary>그림이 안 떠요 / 분석이 안 돼요</summary><p>상단 <b>‘분석 실행’</b> 버튼을 한 번 눌러 보세요. 인터넷이 느리면 명화 대신 비슷한 자동 그림으로 대체될 수 있어요(정상이에요). 그래도 빈 화면이면 페이지를 새로고침해 보세요.</p></details>
+    <details><summary>‘K’가 뭐예요? 얼마로 해야 해요?</summary><p>K는 <b>‘색을 몇 개로 요약할까’</b>예요. 정답은 없어요 — <b>작게(5~8)</b> 하면 단순·추상적이고, <b>크게(20~50)</b> 하면 원본에 가깝게 자세해져요. 둘 다 해보고 분위기를 비교하는 게 공부예요.</p></details>
+    <details><summary>내가 찍은 사진을 써도 되나요?</summary><p>네! 사진 파일을 작품 화면 위로 <b>끌어다 놓거나</b>, 상단 <b>‘이미지 업로드’</b>를 눌러요. (남의 작품을 쓸 땐 ‘윤리·리포트’ 칸에 출처를 적어요.)</p></details>
+    <details><summary>소리는 어떻게 넣어요?</summary><p><b>소리를 데이터로</b> 페이지에서 🎤 녹음하거나 오디오 파일을 넣어요. 소리는 저장되지 않고 <b>특징(숫자)만</b> 써요. 같은 페이지의 <b>‘춤추는 점’</b>에서 그 소리가 바로 작품이 돼요.</p></details>
+    <details><summary>모르는 단어·옵션이 나와요</summary><p>화면 곳곳의 <b>ⓘ</b> 아이콘을 누르면 그 자리에서 쉬운 말로 설명해 줘요. 더 깊이 알고 싶으면 상단 <b>배우기 → 알고리즘 배움터</b>로 가요(쉬움→깊음).</p></details>
+    <details><summary>실수하면 어떡하죠?</summary><p>걱정 마세요. 무엇이든 다시 바꿀 수 있고, 망가지지 않아요. <b>이것저것 눌러 보는 것</b>이 가장 좋은 방법이에요. 마음에 드는 설정은 ‘설정 저장’으로 보관할 수 있어요.</p></details>
+  </div>
+
+  <p class="footer-note">잘 모르겠으면 일단 슬라이더를 만져 보세요 — 보는 것이 곧 배우는 것이에요. 🌟</p>
+</div>
+
+<script src="js/explain.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  if (window.UI && UI.mountIdeaBar) UI.mountIdeaBar('idea', 'general');
+</script>
+</body>
+</html>
