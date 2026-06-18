@@ -8,7 +8,7 @@
   'use strict';
 
   // 저장된 테마를 가능한 한 일찍 적용(깜빡임 최소화)
-  try { if (localStorage.getItem('dn_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
+  try { if (localStorage.getItem('dn_theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
 
   const NAV = [
     { label: '사용 안내', href: 'start.html' },
@@ -77,11 +77,11 @@
     UI.renderUser();
   };
 
-  function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+  function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function updateThemeIcon(btn) { const light = currentTheme() === 'light'; btn.textContent = light ? '🌙' : '🌞'; btn.title = light ? '어둡게' : '밝게'; }
   UI.toggleTheme = function () {
     const next = currentTheme() === 'light' ? 'dark' : 'light';
-    if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    if (next === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
     else document.documentElement.removeAttribute('data-theme');
     try { localStorage.setItem('dn_theme', next); } catch (e) {}
     const tt = document.getElementById('theme-toggle'); if (tt) updateThemeIcon(tt);
